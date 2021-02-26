@@ -20,12 +20,18 @@ namespace CloudSync.ViewModels
             set { Set(() => DstCon, value); }
         }
 
+        public bool SyncedWithSrc
+        {
+            get { return Get(() => SyncedWithSrc); }
+            set { Set(() => SyncedWithSrc, value); }
+        }
+
         public OpenWindowViewModel()
         {
             SrcCon = new Connection();
             DstCon = new Connection();
         }
-        
+
         public ICommand SaveCommand
         {
             get
@@ -36,6 +42,9 @@ namespace CloudSync.ViewModels
                         SrcCon.Host = "localhost";
                     if (SrcCon.Port == 0)
                         SrcCon.Port = 3306;
+
+                    if (SyncedWithSrc)
+                        DstCon = SrcCon;
 
                     if (string.IsNullOrEmpty(DstCon.Host))
                         DstCon.Host = "localhost";

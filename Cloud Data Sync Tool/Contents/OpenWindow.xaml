@@ -33,13 +33,12 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Host:"/>
-                    <TextBox Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
-                         Text="{Binding SrcCon.Host, Mode=TwoWay}"/>
+                    <TextBox Name="SrcHost" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
+                             Text="{Binding SrcCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <DockPanel Grid.Column="2">
                         <TextBlock DockPanel.Dock="Left" FontSize="20" VerticalAlignment="Center" Text="Port:"/>
-                        <TextBox Margin="10,0,0,0" HorizontalAlignment="Stretch" FontSize="20" VerticalContentAlignment="Center"
-                             Text="{Binding SrcCon.Port, Mode=TwoWay}"
-                             PreviewTextInput="PortTextBox_OnPreviewTextInput"/>
+                        <TextBox Name="SrcPort" Margin="10,0,0,0" HorizontalAlignment="Stretch" FontSize="20" VerticalContentAlignment="Center"
+                                 Text="{Binding SrcCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="PortTextBox_OnPreviewTextInput"/>
                     </DockPanel>
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
@@ -49,8 +48,8 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="User Id:"/>
-                    <TextBox Grid.Column="1" Margin="20,0,20,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding SrcCon.Id, Mode=TwoWay}"/>
+                    <TextBox Name="SrcId" Grid.Column="1" Margin="20,0,20,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                             Text="{Binding SrcCon.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
                 <Grid Grid.Row="2" Margin="5">
                     <Grid.ColumnDefinitions>
@@ -59,9 +58,9 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Password:"/>
-                    <PasswordBox Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
+                    <PasswordBox Name="SrcPw" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
                         <i:Interaction.Behaviors>
-                            <cb:PasswordBoxBehavior BoundPassword="{Binding SrcCon.Password, Mode=TwoWay}"/>
+                            <cb:PasswordBoxBehavior BoundPassword="{Binding SrcCon.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </i:Interaction.Behaviors>
                     </PasswordBox>
                 </Grid>
@@ -71,8 +70,8 @@
                         <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Database:"/>
-                    <TextBox Grid.Column="1" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding SrcCon.Database, Mode=TwoWay}"/>
+                    <TextBox Name="SrcDb"  Grid.Column="1" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                             Text="{Binding SrcCon.Database, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
             </Grid>
         </GroupBox>
@@ -80,7 +79,10 @@
             <GroupBox.Header>
                 <DockPanel>
                     <TextBlock Text="Destination Database Connection" DockPanel.Dock="Left" Foreground="White"/>
-                    <CheckBox Content="Same as source connection." DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,30,0"/>
+                    <CheckBox Content="Same as source connection." DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,30,0"
+                              ctrls:CheckBoxHelper.ForegroundUnchecked="White" ctrls:CheckBoxHelper.ForegroundChecked="White" ctrls:CheckBoxHelper.CheckSize="15"
+                              IsChecked="{Binding SyncedWithSrc}"
+                              Checked="ConnectionCheckbox_OnChecked" Unchecked="ConnectionCheckbox_OnUnchecked"/>
                 </DockPanel>
             </GroupBox.Header>
             <Grid>
@@ -97,13 +99,15 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Host:"/>
-                    <TextBox Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
-                         Text="{Binding DstCon.Host, Mode=TwoWay}"/>
+                    <TextBox Name="DstHost" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
+                             Text="{Binding DstCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"/>
                     <DockPanel Grid.Column="2">
                         <TextBlock DockPanel.Dock="Left" FontSize="20" VerticalAlignment="Center" Text="Port:"/>
-                        <TextBox Margin="10,0,0,0" HorizontalAlignment="Stretch" FontSize="20" VerticalContentAlignment="Center"
-                             Text="{Binding DstCon.Port, Mode=TwoWay}"
-                             PreviewTextInput="PortTextBox_OnPreviewTextInput"/>
+                        <TextBox Name="DstPort" Margin="10,0,0,0" HorizontalAlignment="Stretch" FontSize="20" VerticalContentAlignment="Center"
+                                 Text="{Binding DstCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"
+                                 PreviewTextInput="PortTextBox_OnPreviewTextInput"/>
                     </DockPanel>
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
@@ -113,8 +117,9 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="User Id:"/>
-                    <TextBox Grid.Column="1" Margin="20,0,20,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding DstCon.Id, Mode=TwoWay}"/>
+                    <TextBox Name="DstId"  Grid.Column="1" Margin="20,0,20,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                             Text="{Binding DstCon.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"/>
                 </Grid>
                 <Grid Grid.Row="2" Margin="5">
                     <Grid.ColumnDefinitions>
@@ -123,9 +128,10 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Password:"/>
-                    <PasswordBox Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
+                    <PasswordBox Name="DstPw" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
+                                 IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}">
                         <i:Interaction.Behaviors>
-                            <cb:PasswordBoxBehavior BoundPassword="{Binding DstCon.Password, Mode=TwoWay}"/>
+                            <cb:PasswordBoxBehavior BoundPassword="{Binding DstCon.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </i:Interaction.Behaviors>
                     </PasswordBox>
                 </Grid>
@@ -135,8 +141,9 @@
                         <ColumnDefinition Width="7*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Database:"/>
-                    <TextBox Grid.Column="1" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding DstCon.Database, Mode=TwoWay}"/>
+                    <TextBox Name="DstDb" Grid.Column="1" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                             Text="{Binding DstCon.Database, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"/>
                 </Grid>
             </Grid>
         </GroupBox>

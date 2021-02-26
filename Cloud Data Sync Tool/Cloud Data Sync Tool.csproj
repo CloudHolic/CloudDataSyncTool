@@ -128,12 +128,15 @@
     <Compile Include="Contents\OpenWindow.xaml.cs">
       <DependentUpon>OpenWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\NotConverter.cs" />
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\IEvent.cs" />
     <Compile Include="Events\IEventBus.cs" />
+    <Compile Include="Models\ColumnType.cs" />
     <Compile Include="Models\Connection.cs" />
+    <Compile Include="Models\TableName.cs" />
     <Compile Include="Utils\CustomDialogManager.cs" />
+    <Compile Include="Utils\DbUtils.cs" />
     <Compile Include="Utils\ICustomDialogManager.cs" />
     <Compile Include="ViewModels\DialogViewModelBase.cs" />
     <Compile Include="ViewModels\IDialogViewModelBase.cs" />

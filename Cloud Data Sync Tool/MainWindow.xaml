@@ -4,9 +4,60 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="Cloud Data Sync Tool" Height="450" Width="800" WindowStartupLocation="CenterScreen">
-    <Grid>
-        
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <GroupBox Grid.Column="0" Header="Source Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
+            <TreeView>
+                <TreeViewItem Header="Source">
+                    <TreeViewItem Header="AAA">
+                        <TextBlock Text="aaa"/>
+                        <TextBlock Text="bbb"/>
+                    </TreeViewItem>
+                    <TreeViewItem Header="BBB">
+                        <TextBlock Text="ccc"/>
+                        <TextBlock Text="ddd"/>
+                    </TreeViewItem>
+                </TreeViewItem>
+            </TreeView>
+        </GroupBox>
+        <Grid Grid.Column="1" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="1" Orientation="Vertical" Margin="5" VerticalAlignment="Center">
+                <Button Content="Copy" FontSize ="15" Margin="0,0,0,10"/>
+                <Button Margin="0,0,0,10">
+                    <Rectangle Width="50" Height="15" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{iconPacks:Modern Kind=ArrowLeftRight}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button>
+                <Button Content="Login" FontSize="15" Margin="0"/>
+            </StackPanel>
+        </Grid>
+        <GroupBox Grid.Column="2" Header="Destination Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
+            <TreeView>
+                <TreeViewItem Header="Destination">
+                    <TreeViewItem Header="AAA" Background="White">
+                        <TextBlock Text="aaa"/>
+                        <TextBlock Text="bbb"/>
+                    </TreeViewItem>
+                    <TreeViewItem Header="BBB">
+                        <TextBlock Text="ccc"/>
+                        <TextBlock Text="ddd"/>
+                    </TreeViewItem>
+                </TreeViewItem>
+            </TreeView>
+        </GroupBox>
     </Grid>
 </mah:MetroWindow>
