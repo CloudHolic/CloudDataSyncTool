@@ -15,15 +15,12 @@
         </Grid.ColumnDefinitions>
         <GroupBox Grid.Column="0" Header="Source Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
             <TreeView>
-                <TreeViewItem Header="Source">
-                    <TreeViewItem Header="AAA">
-                        <TextBlock Text="aaa"/>
-                        <TextBlock Text="bbb"/>
-                    </TreeViewItem>
-                    <TreeViewItem Header="BBB">
-                        <TextBlock Text="ccc"/>
-                        <TextBlock Text="ddd"/>
-                    </TreeViewItem>
+                <TreeViewItem Header="{Binding SrcName}" ItemsSource="{Binding SrcTables}">
+                    <TreeViewItem.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding TableNames}">
+                            <TextBlock Text="{Binding SchemaName}"/>
+                        </HierarchicalDataTemplate>
+                    </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
             </TreeView>
         </GroupBox>
@@ -34,28 +31,25 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="1" Orientation="Vertical" Margin="5" VerticalAlignment="Center">
-                <Button Content="Copy" FontSize ="15" Margin="0,0,0,10"/>
-                <Button Margin="0,0,0,10">
+                <Button Content="Copy" FontSize ="15" Margin="0,0,0,10" Command="{Binding CopyCommand}"/>
+                <Button Margin="0,0,0,10" Command="{Binding ChangeCommand}">
                     <Rectangle Width="50" Height="15" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                         <Rectangle.OpacityMask>
                             <VisualBrush Stretch="Fill" Visual="{iconPacks:Modern Kind=ArrowLeftRight}"/>
                         </Rectangle.OpacityMask>
                     </Rectangle>
                 </Button>
-                <Button Content="Login" FontSize="15" Margin="0"/>
+                <Button Content="Login" FontSize="15" Margin="0" Command="{Binding LoginCommand}"/>
             </StackPanel>
         </Grid>
         <GroupBox Grid.Column="2" Header="Destination Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
             <TreeView>
-                <TreeViewItem Header="Destination">
-                    <TreeViewItem Header="AAA" Background="White">
-                        <TextBlock Text="aaa"/>
-                        <TextBlock Text="bbb"/>
-                    </TreeViewItem>
-                    <TreeViewItem Header="BBB">
-                        <TextBlock Text="ccc"/>
-                        <TextBlock Text="ddd"/>
-                    </TreeViewItem>
+                <TreeViewItem Header="{Binding DstName}" ItemsSource="{Binding DstTables}">
+                    <TreeViewItem.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding TableNames}">
+                            <TextBlock Text="{Binding SchemaName}"/>
+                        </HierarchicalDataTemplate>
+                    </TreeViewItem.ItemTemplate>
                 </TreeViewItem>
             </TreeView>
         </GroupBox>

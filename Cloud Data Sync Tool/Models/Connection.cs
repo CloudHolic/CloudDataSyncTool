@@ -59,15 +59,15 @@ namespace CloudSync.Models
         }
         #endregion
 
-        #region string Database;
-        private string _database;
-        public string Database
+        #region string Name;
+        private string _name;
+        public string Name
         {
-            get => _database;
+            get => _name;
             set
             {
-                _database = value;
-                OnPropertyChanged(nameof(Database));
+                _name = value;
+                OnPropertyChanged(nameof(Name));
             }
         }
         #endregion
@@ -76,7 +76,7 @@ namespace CloudSync.Models
         {
             Host = "localhost";
             Port = 3306;
-            Id = Database = "";
+            Id = Name = "";
             Password = new SecureString();
         }
 
@@ -86,7 +86,7 @@ namespace CloudSync.Models
             Port = port;
             Id = id;
             Password = ConvertToSecureString(password);
-            Database = database;
+            Name = database;
         }
 
         public Connection(Connection prevConnection)
@@ -95,7 +95,7 @@ namespace CloudSync.Models
             Port = prevConnection.Port;
             Id = prevConnection.Id;
             Password = prevConnection.Password;
-            Database = prevConnection.Database;
+            Name = prevConnection.Name;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

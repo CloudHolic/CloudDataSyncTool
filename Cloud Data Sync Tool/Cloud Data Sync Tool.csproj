@@ -134,6 +134,7 @@
     <Compile Include="Events\IEventBus.cs" />
     <Compile Include="Models\ColumnType.cs" />
     <Compile Include="Models\Connection.cs" />
+    <Compile Include="Models\TableList.cs" />
     <Compile Include="Models\TableName.cs" />
     <Compile Include="Utils\CustomDialogManager.cs" />
     <Compile Include="Utils\DbUtils.cs" />

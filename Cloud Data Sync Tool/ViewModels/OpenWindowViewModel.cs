@@ -44,7 +44,10 @@ namespace CloudSync.ViewModels
                         SrcCon.Port = 3306;
 
                     if (SyncedWithSrc)
-                        DstCon = SrcCon;
+                    {
+                        var temp = DstCon.Name;
+                        DstCon = new Connection(SrcCon) {Name = temp};
+                    }
 
                     if (string.IsNullOrEmpty(DstCon.Host))
                         DstCon.Host = "localhost";

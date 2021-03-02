@@ -12,7 +12,7 @@ namespace CloudSync.Contents
     /// </summary>
     public partial class OpenWindow : MetroWindow
     {
-        private Binding _prevHostBinding, _prevPortBinding, _prevIdBinding, _prevDbBinding;
+        private Binding _prevHostBinding, _prevPortBinding, _prevIdBinding;
 
         public OpenWindow()
         {
@@ -30,12 +30,10 @@ namespace CloudSync.Contents
             _prevHostBinding = DstHost.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
             _prevPortBinding = DstPort.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
             _prevIdBinding = DstId.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
-            _prevDbBinding = DstDb.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
 
             DstHost.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcHost});
             DstPort.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcPort});
             DstId.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcId});
-            DstDb.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcDb});
 
             // TODO: 1. Save previous binding of DstPw to _prevPwBinding.
             // TODO: 2. Change binding BoundPasswordProperty of DstPw to that of SrcPw. (Interaction.GetBehaviors(DstPw)[0])
@@ -52,9 +50,6 @@ namespace CloudSync.Contents
             if(_prevIdBinding != null)
                 DstId.SetBinding(TextBox.TextProperty, _prevIdBinding);
             
-            if(_prevDbBinding != null)
-                DstDb.SetBinding(TextBox.TextProperty, _prevDbBinding);
-
             // TODO: Change binding BoundPasswordProperty of DstPw to _prevPwBinding.
         }
     }

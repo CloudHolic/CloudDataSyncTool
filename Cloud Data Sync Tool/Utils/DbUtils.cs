@@ -25,8 +25,7 @@ namespace CloudSync.Utils
 
         private static string MakeConnectionString(Connection conString)
         {
-            var db = string.IsNullOrEmpty(conString.Database) ? string.Empty : $"database={conString.Database}";
-            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};{db};AllowLoadLocalInfile=true";
+            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};AllowLoadLocalInfile=true";
         }
 
         private static MySqlConnection ConnectionFactory(string connString)
@@ -36,11 +35,11 @@ namespace CloudSync.Utils
             return connection;
         }
 
-        public List<string> FindSchemas()
+        public List<string> FindSchemas(bool isSrc = true)
         {
             List<string> schemaList;
 
-            using (var connection = ConnectionFactory(_srcString))
+            using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
             {
                 schemaList = connection.Query<string>("select SCHEMA_NAME from information_schema.SCHEMATA").ToList();
             }
@@ -48,11 +47,11 @@ namespace CloudSync.Utils
             return schemaList;
         }
 
-        public List<string> FindTables(string schemaName)
+        public List<string> FindTables(string schemaName, bool isSrc = true)
         {
             List<string> tableList;
 
-            using (var connection = ConnectionFactory(_srcString))
+            using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
             {
                 tableList = connection.Query<string>("select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = @Schema and TABLE_TYPE != 'VIEW'",
                     new { Schema = schemaName }).ToList();
@@ -61,11 +60,11 @@ namespace CloudSync.Utils
             return tableList;
         }
 
-        public List<ColumnType> FindColumns(string schemaName, string tableName)
+        public List<ColumnType> FindColumns(string schemaName, string tableName, bool isSrc = true)
         {
             List<IDictionary<string, object>> result;
 
-            using (var connection = ConnectionFactory(_srcString))
+            using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
             {
                 var rawResult = connection.Query("select COLUMN_NAME, COLUMN_TYPE from information_schema.COLUMNS where TABLE_SCHEMA = @Schema AND TABLE_NAME = @Table",
                     new { Schema = schemaName, Table = tableName }).ToList();
