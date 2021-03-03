@@ -80,7 +80,7 @@
                 <DockPanel>
                     <TextBlock Text="Destination Database Connection" DockPanel.Dock="Left" Foreground="White"/>
                     <CheckBox Content="Same as source connection." DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,30,0"
-                              ctrls:CheckBoxHelper.ForegroundUnchecked="White" ctrls:CheckBoxHelper.ForegroundChecked="White" ctrls:CheckBoxHelper.CheckSize="15"
+                              ctrls:CheckBoxHelper.CheckSize="15" ctrls:CheckBoxHelper.ForegroundUnchecked="White" ctrls:CheckBoxHelper.ForegroundChecked="White"
                               IsChecked="{Binding SyncedWithSrc}"
                               Checked="ConnectionCheckbox_OnChecked" Unchecked="ConnectionCheckbox_OnUnchecked"/>
                 </DockPanel>

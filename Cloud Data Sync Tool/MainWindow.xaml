@@ -3,10 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:cb="clr-namespace:CloudSync.Behaviors"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:models="clr-namespace:CloudSync.Models"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="Cloud Data Sync Tool" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+    <mah:MetroWindow.Resources>
+        <!-- TODO: Make data structure hierarchical. -->
+        <HierarchicalDataTemplate DataType="{x:Type models:TableList}" ItemsSource="{Binding TableNames, Mode=TwoWay}">
+            <TextBlock Text="{Binding SchemaName, Mode=TwoWay}"/>
+        </HierarchicalDataTemplate>
+    </mah:MetroWindow.Resources>
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -14,14 +23,12 @@
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <GroupBox Grid.Column="0" Header="Source Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
+            <!-- TODO: Support multiSelect -->
             <TreeView>
-                <TreeViewItem Header="{Binding SrcName}" ItemsSource="{Binding SrcTables}">
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding TableNames}">
-                            <TextBlock Text="{Binding SchemaName}"/>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
-                </TreeViewItem>
+                <i:Interaction.Behaviors>
+                    <cb:TreeViewBehavior SelectedItem="{Binding CurTable, Mode=TwoWay}"/>
+                </i:Interaction.Behaviors>
+                <TreeViewItem Header="{Binding SrcName, Mode=TwoWay}" ItemsSource="{Binding SrcTables, Mode=TwoWay}"/>
             </TreeView>
         </GroupBox>
         <Grid Grid.Column="1" Margin="5">
@@ -43,14 +50,9 @@
             </StackPanel>
         </Grid>
         <GroupBox Grid.Column="2" Header="Destination Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
+            <!-- TODO: Support multiSelect -->
             <TreeView>
-                <TreeViewItem Header="{Binding DstName}" ItemsSource="{Binding DstTables}">
-                    <TreeViewItem.ItemTemplate>
-                        <HierarchicalDataTemplate ItemsSource="{Binding TableNames}">
-                            <TextBlock Text="{Binding SchemaName}"/>
-                        </HierarchicalDataTemplate>
-                    </TreeViewItem.ItemTemplate>
-                </TreeViewItem>
+                <TreeViewItem Header="{Binding DstName, Mode=TwoWay}" ItemsSource="{Binding DstTables, Mode=TwoWay}"/>
             </TreeView>
         </GroupBox>
     </Grid>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using CloudSync.Commands;
 using CloudSync.Contents;
@@ -11,6 +12,7 @@ namespace CloudSync.ViewModels
     public class MainWindowViewModel : ViewModelBase
     {
         private Connection _srcConnection, _dstConnection;
+        private readonly string[] _systemSchemas = {"mysql", "sys", "information_schema", "performance_schema"};
 
         public string SrcName
         {
@@ -36,36 +38,19 @@ namespace CloudSync.ViewModels
             set { Set(() => DstTables, value); }
         }
 
+        public object CurTable
+        {
+            get { return Get(() => CurTable); }
+            set { Set(() => CurTable, value); }
+        }
+
         public MainWindowViewModel(Tuple<Connection, Connection> cons)
         {
             (_srcConnection, _dstConnection) = cons;
-            var dbUtil = new DbUtils(_srcConnection, _dstConnection);
             SrcTables = new ObservableCollection<TableList>();
             DstTables = new ObservableCollection<TableList>();
 
-            SrcName = _srcConnection.Name;
-            DstName = _dstConnection.Name;
-
-            var srcSchemas = dbUtil.FindSchemas();
-            var dstSchemas = dbUtil.FindSchemas(false);
-
-            foreach (var schema in srcSchemas)
-            {
-                SrcTables.Add(new TableList
-                {
-                    SchemaName = schema,
-                    TableNames = new ObservableCollection<string>(dbUtil.FindTables(schema))
-                });
-            }
-
-            foreach (var schema in dstSchemas)
-            {
-                DstTables.Add(new TableList
-                {
-                    SchemaName = schema,
-                    TableNames = new ObservableCollection<string>(dbUtil.FindTables(schema, false))
-                });
-            }
+            LoadTables();
         }
 
         public ICommand CopyCommand
@@ -73,8 +58,12 @@ namespace CloudSync.ViewModels
             get
             {
                 return Get(() => CopyCommand, new RelayCommand(() =>
-                { 
+                {
+                    var temp = (string)CurTable;
+                    
+                    // TODO: Find CurTable's parent and copy table(s) to Dst.
 
+                    LoadTables();
                 }));
             }
         }
@@ -88,6 +77,8 @@ namespace CloudSync.ViewModels
                     var temp = new Connection(_srcConnection);
                     _srcConnection = new Connection(_dstConnection);
                     _dstConnection = new Connection(temp);
+
+                    LoadTables();
                 }));
             }
         }
@@ -101,8 +92,39 @@ namespace CloudSync.ViewModels
                     var openWindow = new OpenWindow();
                     openWindow.ShowDialog();
                     if (openWindow.Tag is Tuple<Connection, Connection> result)
+                    {
                         (_srcConnection, _dstConnection) = result;
+                        LoadTables();
+                    }
                 }));
+            }
+        }
+
+        private void LoadTables()
+        {
+            var dbUtil = new DbUtils(_srcConnection, _dstConnection);
+            SrcName = _srcConnection.Name;
+            DstName = _dstConnection.Name;
+
+            var srcSchemas = dbUtil.FindSchemas();
+            var dstSchemas = dbUtil.FindSchemas(false);
+
+            foreach (var schema in srcSchemas.Where(schema => !_systemSchemas.Contains(schema)))
+            {
+                SrcTables.Add(new TableList
+                {
+                    SchemaName = schema,
+                    TableNames = new ObservableCollection<string>(dbUtil.FindTables(schema))
+                });
+            }
+
+            foreach (var schema in dstSchemas.Where(schema => !_systemSchemas.Contains(schema)))
+            {
+                DstTables.Add(new TableList
+                {
+                    SchemaName = schema,
+                    TableNames = new ObservableCollection<string>(dbUtil.FindTables(schema, false))
+                });
             }
         }
     }

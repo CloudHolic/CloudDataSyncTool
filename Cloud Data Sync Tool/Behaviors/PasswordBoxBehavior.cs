@@ -35,5 +35,13 @@ namespace CloudSync.Behaviors
             AssociatedObject.PasswordChanged += AssociatedObjectOnPasswordChanged;
             base.OnAttached();
         }
+
+        protected override void OnDetaching()
+        {
+            if (AssociatedObject != null)
+                AssociatedObject.PasswordChanged -= AssociatedObjectOnPasswordChanged;
+
+            base.OnDetaching();
+        }
     }
 }
