@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Controls;
 using System.Windows.Input;
 using CloudSync.Commands;
 using CloudSync.Contents;
+using CloudSync.Controls;
 using CloudSync.Models;
 using CloudSync.Utils;
 
@@ -12,43 +14,40 @@ namespace CloudSync.ViewModels
     public class MainWindowViewModel : ViewModelBase
     {
         private Connection _srcConnection, _dstConnection;
+        private StackPanel _srcPanel;
         private readonly string[] _systemSchemas = {"mysql", "sys", "information_schema", "performance_schema"};
 
-        public string SrcName
+        public string SrcDb
         {
-            get { return Get(() => SrcName); }
-            set { Set(() => SrcName, value); }
+            get { return Get(() => SrcDb); }
+            set { Set(() => SrcDb, value); }
         }
 
-        public ObservableCollection<TableList> SrcTables
+        public ObservableCollection<TreeItem> SrcTable
         {
-            get { return Get(() => SrcTables); }
-            set { Set(() => SrcTables, value); }
-        }
-        
-        public string DstName
-        {
-            get { return Get(() => DstName); }
-            set { Set(() => DstName, value); }
+            get { return Get(() => SrcTable); }
+            set { Set(() => SrcTable, value); }
         }
 
-        public ObservableCollection<TableList> DstTables
+        public ObservableCollection<TreeItem> DstTable
         {
-            get { return Get(() => DstTables); }
-            set { Set(() => DstTables, value); }
+            get { return Get(() => DstTable); }
+            set { Set(() => DstTable, value); }
         }
 
-        public object CurTable
+        public TreeItem CurTable
         {
             get { return Get(() => CurTable); }
             set { Set(() => CurTable, value); }
         }
 
-        public MainWindowViewModel(Tuple<Connection, Connection> cons)
+        public MainWindowViewModel(Tuple<Connection, Connection> cons, StackPanel srcPanel)
         {
             (_srcConnection, _dstConnection) = cons;
-            SrcTables = new ObservableCollection<TableList>();
-            DstTables = new ObservableCollection<TableList>();
+            SrcTable = new ObservableCollection<TreeItem>();
+            DstTable = new ObservableCollection<TreeItem>();
+
+            _srcPanel = srcPanel;
 
             LoadTables();
         }
@@ -59,10 +58,19 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => CopyCommand, new RelayCommand(() =>
                 {
-                    var temp = (string)CurTable;
-                    
-                    // TODO: Find CurTable's parent and copy table(s) to Dst.
+                    var dbUtil = new DbUtils(_srcConnection, _dstConnection);
+                    var tablePath = $"{CurTable.ParentName}.{CurTable.Name}";
+                    /*
+                    var tables = dbUtil.FindTables(srcSchema);
+                    var files = tables.Select(table => $@"D:\DbDumps\{srcSchema}-{table}.csv").ToList();
+                    var tableList = TableName.GetTableNameList(tables, files);
 
+                    if (tableList != null && tableList.Count > 0)
+                    {
+                        dbUtil.SaveTables(srcSchema, tableList);
+                        dbUtil.BulkLoad(srcSchema, dstSchema, tableList, false);
+                    }
+                    */
                     LoadTables();
                 }));
             }
@@ -102,30 +110,40 @@ namespace CloudSync.ViewModels
 
         private void LoadTables()
         {
+            SrcTable.Clear();
+            DstTable.Clear();
+
             var dbUtil = new DbUtils(_srcConnection, _dstConnection);
-            SrcName = _srcConnection.Name;
-            DstName = _dstConnection.Name;
+            //var src = new TreeItem();
+            var dst = new TreeItem();
+
+            //src.Name = _srcConnection.Name;
+            SrcDb = _srcConnection.Name;
+            dst.Name = _dstConnection.Name;
 
             var srcSchemas = dbUtil.FindSchemas();
             var dstSchemas = dbUtil.FindSchemas(false);
 
             foreach (var schema in srcSchemas.Where(schema => !_systemSchemas.Contains(schema)))
             {
-                SrcTables.Add(new TableList
-                {
-                    SchemaName = schema,
-                    TableNames = new ObservableCollection<string>(dbUtil.FindTables(schema))
-                });
+                //var srcList = new TreeItem {Name = schema, ParentName = src.Name};
+                var srcList = new TableList {SchemaName = schema};
+                foreach(var table in dbUtil.FindTables(schema))
+                    //srcList.Children.Add(new TreeItem {Name = table, ParentName = schema});
+                    srcList.Tables.Add(table);
+                //src.Children.Add(srcList);
+                _srcPanel.Children.Add(new SchemaEntry(srcList));
             }
+            //SrcTable.Add(src);
 
             foreach (var schema in dstSchemas.Where(schema => !_systemSchemas.Contains(schema)))
             {
-                DstTables.Add(new TableList
-                {
-                    SchemaName = schema,
-                    TableNames = new ObservableCollection<string>(dbUtil.FindTables(schema, false))
-                });
+                var dstList = new TreeItem {Name = schema, ParentName = dst.Name};
+                foreach (var table in dbUtil.FindTables(schema))
+                    dstList.Children.Add(new TreeItem {Name = table, ParentName = schema});
+                dst.Children.Add(dstList);
             }
+            DstTable.Add(dst);
         }
     }
 }

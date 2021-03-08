@@ -132,6 +132,10 @@
     <Compile Include="Contents\OpenWindow.xaml.cs">
       <DependentUpon>OpenWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SchemaEntry.xaml.cs">
+      <DependentUpon>SchemaEntry.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\IEvent.cs" />
@@ -140,6 +144,7 @@
     <Compile Include="Models\Connection.cs" />
     <Compile Include="Models\TableList.cs" />
     <Compile Include="Models\TableName.cs" />
+    <Compile Include="Models\TreeItem.cs" />
     <Compile Include="Utils\CustomDialogManager.cs" />
     <Compile Include="Utils\DbUtils.cs" />
     <Compile Include="Utils\ICustomDialogManager.cs" />
@@ -147,6 +152,7 @@
     <Compile Include="ViewModels\IDialogViewModelBase.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\OpenWindowViewModel.cs" />
+    <Compile Include="ViewModels\SchemaEntryViewModel.cs" />
     <Compile Include="ViewModels\VerifiableViewModelBase.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Page Include="Assets\Converters.xaml">
@@ -154,6 +160,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Contents\OpenWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SchemaEntry.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

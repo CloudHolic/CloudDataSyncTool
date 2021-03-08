@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -98,12 +97,14 @@ namespace CloudSync.Models
             Name = prevConnection.Name;
         }
 
+        #region INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
 
         private SecureString ConvertToSecureString(string password)
         {

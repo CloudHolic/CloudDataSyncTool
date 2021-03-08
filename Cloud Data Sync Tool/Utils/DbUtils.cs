@@ -96,8 +96,7 @@ namespace CloudSync.Utils
         {
             try
             {
-                var stopwatch = new Stopwatch();
-
+                //var stopwatch = new Stopwatch();
                 using (var connection = ConnectionFactory(_srcString))
                 {
                     foreach (var table in tableNameList)
@@ -105,7 +104,7 @@ namespace CloudSync.Utils
                         if (string.IsNullOrEmpty(table.FileName) || string.IsNullOrEmpty(table.Table))
                             throw new ArgumentNullException();
 
-                        stopwatch.Restart();
+                        //stopwatch.Restart();
 
                         var records = connection.Query($"select * from {schemaName}.{table.Table}").ToList();
 
@@ -117,11 +116,10 @@ namespace CloudSync.Utils
                             csvWriter.WriteRecords(records);
                         }
 
-                        Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
+                        //Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
                     }
                 }
-
-                stopwatch.Stop();
+                //stopwatch.Stop();
             }
             catch (Exception e)
             {
@@ -135,11 +133,11 @@ namespace CloudSync.Utils
             try
             {
                 var countList = new List<int>();
-                var stopwatch = new Stopwatch();
+                //var stopwatch = new Stopwatch();
 
                 using (var connection = ConnectionFactory(_destString))
                 {
-                    stopwatch.Start();
+                    //stopwatch.Start();
 
                     connection.Execute("set global local_infile = true");
                     connection.Execute("set foreign_key_checks = 0");
@@ -153,19 +151,19 @@ namespace CloudSync.Utils
                         connection.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchema}."));
                     }
 
-                    Console.WriteLine($@"Tables created. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
+                    //Console.WriteLine($@"Tables created. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
 
-                    for (var i = 0; i < tableNameList.Count; i++)
+                    foreach (var table in tableNameList)
                     {
-                        stopwatch.Restart();
+                        //stopwatch.Restart();
 
                         var bulkLoader = new MySqlBulkLoader(connection)
                         {
                             Local = true,
-                            TableName = $"{destSchema}.{tableNameList[i].Table}",
+                            TableName = $"{destSchema}.{table.Table}",
                             FieldTerminator = ",",
                             LineTerminator = "\n",
-                            FileName = tableNameList[i].FileName,
+                            FileName = table.FileName,
                             NumberOfLinesToSkip = 1,
                             ConflictOption = MySqlBulkLoaderConflictOption.Replace
                         };
@@ -173,14 +171,14 @@ namespace CloudSync.Utils
                         var count = bulkLoader.Load();
                         countList.Add(count);
                         if (deleteFiles)
-                            File.Delete(tableNameList[i].FileName);
+                            File.Delete(table.FileName);
 
-                        Console.WriteLine($@"Table '{tableNameList[i].Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
+                        //Console.WriteLine($@"Table '{table.Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
                     }
                     
                     connection.Execute("set foreign_key_checks = 1");
                     connection.Execute("set global local_infile = false");
-                    stopwatch.Stop();
+                    //stopwatch.Stop();
 
                     return countList;
                 }

@@ -11,9 +11,8 @@
         mc:Ignorable="d"
         Title="Cloud Data Sync Tool" Height="450" Width="800" WindowStartupLocation="CenterScreen">
     <mah:MetroWindow.Resources>
-        <!-- TODO: Make data structure hierarchical. -->
-        <HierarchicalDataTemplate DataType="{x:Type models:TableList}" ItemsSource="{Binding TableNames, Mode=TwoWay}">
-            <TextBlock Text="{Binding SchemaName, Mode=TwoWay}"/>
+        <HierarchicalDataTemplate DataType="{x:Type models:TreeItem}" ItemsSource="{Binding Path=Children}">
+            <TextBlock Text="{Binding Name}"/>
         </HierarchicalDataTemplate>
     </mah:MetroWindow.Resources>
     <Grid Margin="10">
@@ -23,13 +22,17 @@
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <GroupBox Grid.Column="0" Header="Source Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
-            <!-- TODO: Support multiSelect -->
-            <TreeView>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollPreviewMouseWheel">
+                <StackPanel x:Name="SrcPanel" Margin="5">
+                    <TextBlock Text="{Binding SrcDb}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </ScrollViewer>
+            <!-- TODO: Support multiSelect
+            <TreeView ItemsSource="{Binding SrcTable, Mode=TwoWay}">
                 <i:Interaction.Behaviors>
                     <cb:TreeViewBehavior SelectedItem="{Binding CurTable, Mode=TwoWay}"/>
                 </i:Interaction.Behaviors>
-                <TreeViewItem Header="{Binding SrcName, Mode=TwoWay}" ItemsSource="{Binding SrcTables, Mode=TwoWay}"/>
-            </TreeView>
+            </TreeView> -->
         </GroupBox>
         <Grid Grid.Column="1" Margin="5">
             <Grid.RowDefinitions>
@@ -51,8 +54,10 @@
         </Grid>
         <GroupBox Grid.Column="2" Header="Destination Database" mah:ControlsHelper.ContentCharacterCasing="Normal" Margin="5">
             <!-- TODO: Support multiSelect -->
-            <TreeView>
-                <TreeViewItem Header="{Binding DstName, Mode=TwoWay}" ItemsSource="{Binding DstTables, Mode=TwoWay}"/>
+            <TreeView ItemsSource="{Binding DstTable, Mode=TwoWay}">
+                <i:Interaction.Behaviors>
+                    <cb:TreeViewBehavior SelectedItem="{Binding CurTable, Mode=TwoWay}"/>
+                </i:Interaction.Behaviors>
             </TreeView>
         </GroupBox>
     </Grid>
