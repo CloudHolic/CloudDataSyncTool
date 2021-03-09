@@ -4,7 +4,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:cb="clr-namespace:CloudSync.Behaviors"
+             xmlns:controls="clr-namespace:CloudSync.Controls"
              mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
@@ -17,14 +18,19 @@
                     <i:InvokeCommandAction Command="{Binding DoubleClickCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
+            <i:Interaction.Behaviors>
+                <cb:SchemaButtonBehavior IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </i:Interaction.Behaviors>
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <TextBlock x:Name="SchemaText" FontSize="13" FontWeight="Normal" VerticalAlignment="Center" Padding="0,3">
-                        <Run Text="    "/>
                         <InlineUIContainer>
-                            <Rectangle Width="10" Height="10" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
+                            <Rectangle Width="10" Height="10" Margin="20,0,3,0" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
                                 <Rectangle.OpacityMask>
-                                    <VisualBrush Stretch="Uniform" Visual="{iconPacks:Modern Kind=ArrowRight}"/>
+                                    <MultiBinding Converter="{StaticResource MultiParameterToVisualBrushConverter}">
+                                        <Binding Path="Tables"/>
+                                        <Binding Path="IsOpened"/>
+                                    </MultiBinding>
                                 </Rectangle.OpacityMask>
                             </Rectangle>
                         </InlineUIContainer>
@@ -34,14 +40,21 @@
                         <Trigger Property="Button.IsMouseOver" Value="True">
                             <Setter Property="Background" TargetName="SchemaText" Value="{StaticResource MahApps.Brushes.Accent3}"/>
                         </Trigger>
-                        <Trigger Property="Button.IsPressed" Value="True">
+                        <DataTrigger Binding="{Binding IsChecked}" Value="True">
                             <Setter Property="Background" TargetName="SchemaText" Value="{StaticResource MahApps.Brushes.Accent}"/>
-                        </Trigger>
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <ListBox Grid.Row="1" SelectionMode="Extended" ItemsSource="{Binding Tables}" ItemStringFormat="&#x09;{0}"
-                 Visibility="{Binding IsOpened, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <controls:MultiSelectionListBox Grid.Row="1" SelectionMode="Extended" ItemsSource="{Binding Tables}" ItemStringFormat="&#x09;{0}" BorderThickness="0"
+                                        BindableSelectedItems="{Binding SelectedTables, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Visibility="{Binding IsOpened, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="LostFocus">
+                    <i:InvokeCommandAction Command="{Binding LostFocusCommand}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </controls:MultiSelectionListBox>
     </Grid>
 </UserControl>

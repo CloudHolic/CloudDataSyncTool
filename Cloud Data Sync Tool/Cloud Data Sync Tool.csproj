@@ -47,11 +47,11 @@
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.4.4\lib\net47\MahApps.Metro.dll</HintPath>
     </Reference>
-    <Reference Include="MahApps.Metro.IconPacks.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.IconPacks.Modern.4.8.0\lib\net47\MahApps.Metro.IconPacks.Core.dll</HintPath>
+    <Reference Include="MahApps.Metro.IconPacks.BootstrapIcons, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.BootstrapIcons.4.8.0\lib\net47\MahApps.Metro.IconPacks.BootstrapIcons.dll</HintPath>
     </Reference>
-    <Reference Include="MahApps.Metro.IconPacks.Modern, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MahApps.Metro.IconPacks.Modern.4.8.0\lib\net47\MahApps.Metro.IconPacks.Modern.dll</HintPath>
+    <Reference Include="MahApps.Metro.IconPacks.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0c0d510f9915137a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.IconPacks.BootstrapIcons.4.8.0\lib\net47\MahApps.Metro.IconPacks.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.5.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
@@ -128,14 +128,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Behaviors\PasswordBoxBehavior.cs" />
+    <Compile Include="Behaviors\SchemaButtonBehavior.cs" />
     <Compile Include="Behaviors\TreeViewBehavior.cs" />
     <Compile Include="Contents\OpenWindow.xaml.cs">
       <DependentUpon>OpenWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\MultiSelectionListBox.cs" />
     <Compile Include="Controls\SchemaEntry.xaml.cs">
       <DependentUpon>SchemaEntry.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\MultiParameterToVisualBrushConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\IEvent.cs" />

@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:cvt="clr-namespace:CloudSync.Converters">
-    <cvt:NotConverter x:Key="NotConverter"/>
     <cvt:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <cvt:MultiParameterToVisualBrushConverter x:Key="MultiParameterToVisualBrushConverter"/>
+    <cvt:NotConverter x:Key="NotConverter"/>
 </ResourceDictionary>

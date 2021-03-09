@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CloudSync.Commands;
@@ -8,13 +10,14 @@ using CloudSync.Contents;
 using CloudSync.Controls;
 using CloudSync.Models;
 using CloudSync.Utils;
+using MahApps.Metro.Controls;
 
 namespace CloudSync.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
         private Connection _srcConnection, _dstConnection;
-        private StackPanel _srcPanel;
+        private readonly StackPanel _srcPanel, _dstPanel;
         private readonly string[] _systemSchemas = {"mysql", "sys", "information_schema", "performance_schema"};
 
         public string SrcDb
@@ -58,8 +61,17 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => CopyCommand, new RelayCommand(() =>
                 {
-                    var dbUtil = new DbUtils(_srcConnection, _dstConnection);
-                    var tablePath = $"{CurTable.ParentName}.{CurTable.Name}";
+                    //var dbUtil = new DbUtils(_srcConnection, _dstConnection);
+                    //var tablePath = $"{CurTable.ParentName}.{CurTable.Name}";
+
+                    foreach (var child in _srcPanel.Children)
+                    {
+                        var tableList = ((DependencyObject)child).FindChild<ListBox>();
+                        var items = new List<string>();
+
+                        if (tableList != null)
+                            items.AddRange(tableList.SelectedItems.Cast<string>());
+                    }
                     /*
                     var tables = dbUtil.FindTables(srcSchema);
                     var files = tables.Select(table => $@"D:\DbDumps\{srcSchema}-{table}.csv").ToList();
@@ -110,7 +122,7 @@ namespace CloudSync.ViewModels
 
         private void LoadTables()
         {
-            SrcTable.Clear();
+            _srcPanel.Children.RemoveRange(1, _srcPanel.Children.Count - 1);
             DstTable.Clear();
 
             var dbUtil = new DbUtils(_srcConnection, _dstConnection);

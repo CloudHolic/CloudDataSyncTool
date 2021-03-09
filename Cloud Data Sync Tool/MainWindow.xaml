@@ -45,7 +45,7 @@
                 <Button Margin="0,0,0,10" Command="{Binding ChangeCommand}">
                     <Rectangle Width="50" Height="15" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                         <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill" Visual="{iconPacks:Modern Kind=ArrowLeftRight}"/>
+                            <VisualBrush Stretch="Fill" Visual="{iconPacks:BootstrapIcons Kind=ArrowLeftRight}"/>
                         </Rectangle.OpacityMask>
                     </Rectangle>
                 </Button>
