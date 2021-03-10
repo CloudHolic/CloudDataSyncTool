@@ -30,17 +30,18 @@
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <TextBlock x:Name="SchemaText" FontSize="13" FontWeight="Normal" VerticalAlignment="Center" Padding="0,3">
-                        <InlineUIContainer>
-                            <Rectangle Width="10" Height="10" Margin="0,0,3,0" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
-                                <Rectangle.OpacityMask>
-                                    <MultiBinding Converter="{StaticResource MultiParameterToVisualBrushConverter}">
-                                        <Binding ElementName="SrcPanel" Path="Children"/>
-                                        <Binding Path="IsSrcOpened"/>
-                                    </MultiBinding>
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </InlineUIContainer>
-                        <Run Text="{Binding SrcDb}"/>
+                                    <InlineUIContainer>
+                                        <Rectangle Width="10" Height="10" Margin="0,0,3,0" 
+                                                   Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
+                                            <Rectangle.OpacityMask>
+                                                <MultiBinding Converter="{StaticResource MultiParameterToVisualBrushConverter}">
+                                                    <Binding ElementName="SrcPanel" Path="Children"/>
+                                                    <Binding Path="IsSrcOpened"/>
+                                                </MultiBinding>
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                    </InlineUIContainer>
+                                    <Run Text="{Binding SrcDb}"/>
                                 </TextBlock>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="Button.IsMouseOver" Value="True">
@@ -90,17 +91,18 @@
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <TextBlock x:Name="SchemaText" FontSize="13" FontWeight="Normal" VerticalAlignment="Center" Padding="0,3">
-                        <InlineUIContainer>
-                            <Rectangle Width="10" Height="10" Margin="0,0,3,0" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
-                                <Rectangle.OpacityMask>
-                                    <MultiBinding Converter="{StaticResource MultiParameterToVisualBrushConverter}">
-                                        <Binding ElementName="DstPanel" Path="Children"/>
-                                        <Binding Path="IsDstOpened"/>
-                                    </MultiBinding>
-                                </Rectangle.OpacityMask>
-                            </Rectangle>
-                        </InlineUIContainer>
-                        <Run Text="{Binding DstDb}"/>
+                                    <InlineUIContainer>
+                                        <Rectangle Width="10" Height="10" Margin="0,0,3,0" 
+                                                   Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
+                                            <Rectangle.OpacityMask>
+                                                <MultiBinding Converter="{StaticResource MultiParameterToVisualBrushConverter}">
+                                                    <Binding ElementName="DstPanel" Path="Children"/>
+                                                    <Binding Path="IsDstOpened"/>
+                                                </MultiBinding>
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                    </InlineUIContainer>
+                                    <Run Text="{Binding DstDb}"/>
                                 </TextBlock>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="Button.IsMouseOver" Value="True">

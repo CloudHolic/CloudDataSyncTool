@@ -29,7 +29,8 @@
                 <ControlTemplate TargetType="Button">
                     <TextBlock x:Name="SchemaText" FontSize="13" FontWeight="Normal" VerticalAlignment="Center" Padding="0,3">
                         <InlineUIContainer>
-                            <Rectangle Width="10" Height="10" Margin="20,0,3,0" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
+                            <Rectangle Width="10" Height="10" Margin="20,0,3,0" 
+                                       Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TextBlock}}}">
                                 <Rectangle.OpacityMask>
                                     <MultiBinding Converter="{StaticResource MultiParameterToVisualBrushConverter}">
                                         <Binding Path="Tables"/>
