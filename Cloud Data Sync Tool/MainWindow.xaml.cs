@@ -15,7 +15,7 @@ namespace CloudSync
         public MainWindow(Tuple<Connection, Connection> cons)
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel(cons, SrcPanel);
+            DataContext = new MainWindowViewModel(cons, new Tuple<StackPanel, StackPanel>(SrcPanel, DstPanel));
         }
 
         private void ScrollPreviewMouseWheel(object sender, MouseWheelEventArgs e)

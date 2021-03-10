@@ -1,8 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Controls;
 using System.Windows.Input;
+using CloudSync.Behaviors;
 using CloudSync.Commands;
+using CloudSync.Controls;
 using CloudSync.Models;
+using MahApps.Metro.Controls;
+using Microsoft.Xaml.Behaviors;
+using Xceed.Wpf.AvalonDock.Controls;
 
 namespace CloudSync.ViewModels
 {
@@ -32,18 +37,11 @@ namespace CloudSync.ViewModels
             set { Set(() => Tables, value); }
         }
 
-        public ObservableCollection<string> SelectedTables
-        {
-            get { return Get(() => SelectedTables); }
-            set { Set(() => SelectedTables, value); }
-        }
-
         public SchemaEntryViewModel(TableList tables)
         {
             IsOpened = false;
             SchemaName = tables.SchemaName;
             Tables = new ObservableCollection<string>(tables.Tables);
-            SelectedTables = new ObservableCollection<string>();
         }
 
         public ICommand DoubleClickCommand
@@ -57,13 +55,30 @@ namespace CloudSync.ViewModels
             }
         }
 
-        public ICommand LostFocusCommand
+        public ICommand GotFocusCommand
         {
             get
             {
-                return Get(() => LostFocusCommand, new RelayCommand(() =>
+                return Get(() => GotFocusCommand, new RelayCommand<SchemaEntry>(schema =>
                 {
-                    SelectedTables.Clear();
+                    var parent = schema.TryFindParent<StackPanel>();
+                    var children = parent.FindVisualChildren<SchemaEntry>();
+                    
+                    foreach (var child in children)
+                    {
+                        var button = child.FindChild<Button>();
+
+                        if (child == schema)
+                            ((SchemaButtonBehavior)Interaction.GetBehaviors(button)[0]).IsChecked = true;
+                        else
+                        {
+                            ((SchemaButtonBehavior)Interaction.GetBehaviors(button)[0]).IsChecked = false;
+
+                            var list = child.FindVisualChildren<ListBoxItem>();
+                            foreach (var item in list)
+                                item.IsSelected = false;
+                        }
+                    }
                 }));
             }
         }

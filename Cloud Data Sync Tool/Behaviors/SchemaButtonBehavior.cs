@@ -9,7 +9,7 @@ namespace CloudSync.Behaviors
     public class SchemaButtonBehavior : Behavior<Button>
     {
         public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register("IsChecked", typeof(bool), typeof(SchemaButtonBehavior),
-            new UIPropertyMetadata());
+            new UIPropertyMetadata(OnIsCheckedChanged));
 
         public bool IsChecked
         {
@@ -34,6 +34,29 @@ namespace CloudSync.Behaviors
             }
 
             IsChecked = true;
+        }
+
+        private static void OnIsCheckedChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var oldValue = e.OldValue is bool o && o;
+            var newValue = e.NewValue is bool n && n;
+
+            if (!oldValue && newValue)
+            {
+                var parent = ((SchemaButtonBehavior)sender).AssociatedObject.TryFindParent<StackPanel>();
+                if (parent != null)
+                {
+                    if (parent.Children.Count < 1)
+                        return;
+
+                    foreach (var child in parent.Children)
+                    {
+                        var schemaButton = ((DependencyObject)child).FindChild<Button>();
+                        if (schemaButton != null && ((SchemaButtonBehavior)sender).AssociatedObject != schemaButton)
+                            ((SchemaButtonBehavior)Interaction.GetBehaviors(schemaButton)[0]).IsChecked = false;
+                    }
+                }
+            }
         }
 
         protected override void OnAttached()

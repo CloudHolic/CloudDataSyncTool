@@ -5,8 +5,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:cb="clr-namespace:CloudSync.Behaviors"
-             xmlns:controls="clr-namespace:CloudSync.Controls"
-             mc:Ignorable="d">
+             mc:Ignorable="d" x:Name="SchemaControl">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="GotFocus">
+            <i:InvokeCommandAction Command="{Binding GotFocusCommand}" CommandParameter="{Binding ElementName=SchemaControl}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -47,14 +51,8 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <controls:MultiSelectionListBox Grid.Row="1" SelectionMode="Extended" ItemsSource="{Binding Tables}" ItemStringFormat="&#x09;{0}" BorderThickness="0"
-                                        BindableSelectedItems="{Binding SelectedTables, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Visibility="{Binding IsOpened, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="LostFocus">
-                    <i:InvokeCommandAction Command="{Binding LostFocusCommand}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </controls:MultiSelectionListBox>
+        <ListBox Grid.Row="1" SelectionMode="Extended" x:Name="TableList" BorderThickness="0" ItemsSource="{Binding Tables}" ItemStringFormat="&#x09;{0}"
+                 Visibility="{Binding IsOpened, Converter={StaticResource BooleanToVisibilityConverter}}">
+        </ListBox>
     </Grid>
 </UserControl>

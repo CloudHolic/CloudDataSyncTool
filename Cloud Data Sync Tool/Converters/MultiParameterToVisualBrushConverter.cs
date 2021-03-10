@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using MahApps.Metro.IconPacks;
@@ -11,10 +12,12 @@ namespace CloudSync.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            var tables = values[0] as ObservableCollection<string>;
+            var stringTables = values[0] as ObservableCollection<string>;
+            var childTables = values[0] as UIElementCollection;
+
             var isOpened = values[1] is bool b && b;
 
-            if (tables == null || tables.Count < 1)
+            if ((stringTables == null || stringTables.Count < 1) && (childTables == null || childTables.Count < 1))
                 return new VisualBrush {Stretch = Stretch.Uniform};
             return new VisualBrush(new PackIconBootstrapIcons
             {
