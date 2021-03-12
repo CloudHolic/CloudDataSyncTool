@@ -178,8 +178,7 @@ namespace DbTest
 
                         Console.WriteLine($"Table '{tableNameList[i].Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
                     }
-
-
+                    
                     connection.Execute("set foreign_key_checks = 1");
                     connection.Execute("set global local_infile = false");
                     stopwatch.Stop();

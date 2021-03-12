@@ -15,7 +15,6 @@ namespace DbTest
             var srcSchema = "employees";
             var dstSchema = "devtest";
 
-
             var dbModule = new DbModule(srcCon, dstCon);
 
             /*

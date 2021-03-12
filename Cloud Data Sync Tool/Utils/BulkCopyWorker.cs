@@ -80,8 +80,7 @@ namespace CloudSync.Utils
                 var dumpFile = dbUtil.SaveTable(args.SrcSchemaName, table, args.DumpDirectory);
                 progress += 50 / args.SrcTables.Count;
                 worker.ReportProgress(progress, $@"Table '{args.SrcSchemaName}.{table}' saved. Elapsed time: {stopWatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-
-
+                
                 stopWatch.Restart();
                 var count = dbUtil.BulkLoad(args.SrcSchemaName, args.DstSchemaName, table, dumpFile, args.DeleteFile);
                 progress += 50 / args.SrcTables.Count;
