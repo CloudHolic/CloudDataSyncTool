@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace CloudSync.ViewModels
     {
         private Connection _srcConnection, _dstConnection;
         private readonly StackPanel _srcPanel, _dstPanel;
+        private readonly ICustomDialogManager _dialogManager;
         private readonly string[] _systemSchemas = {"mysql", "sys", "information_schema", "performance_schema"};
 
         public bool IsSrcOpened
@@ -81,7 +83,16 @@ namespace CloudSync.ViewModels
             (_srcPanel, _dstPanel) = panels;
             IsSrcOpened = IsDstOpened = false;
             IsWorking = false;
-            
+
+            ProgressValue = 0;
+            ProgressStatus = "Ready";
+
+            _dialogManager = new CustomDialogManager(new MetroDialogSettings
+            {
+                AnimateHide = false,
+                AnimateShow = false
+            });
+
             BulkCopyWorker.Instance.InitWorker(CopyCompleted, ProgressChanged);
 
             LoadTables();
@@ -144,7 +155,7 @@ namespace CloudSync.ViewModels
                         if (schemaViewModel.IsChecked)
                             dstSchema = schemaViewModel.SchemaName;
                     }
-
+                    
                     BulkCopyWorker.Instance.StartWorker(new WorkerArgs
                     {
                         SrcConnection = _srcConnection,
@@ -170,6 +181,9 @@ namespace CloudSync.ViewModels
                     _dstConnection = new Connection(temp);
 
                     LoadTables();
+                    
+                    ProgressValue = 0;
+                    ProgressStatus = "Ready";
                 }, () => !IsWorking));
             }
         }
@@ -186,6 +200,9 @@ namespace CloudSync.ViewModels
                     {
                         (_srcConnection, _dstConnection) = result;
                         LoadTables();
+
+                        ProgressValue = 0;
+                        ProgressStatus = "Ready";
                     }
                 }, () => !IsWorking));
             }
@@ -198,8 +215,10 @@ namespace CloudSync.ViewModels
             else if (e.Error != null)
                 ProgressStatus = "Error occurred. - " + e.Error.Message;
             else
-                ProgressStatus = $"Completed. - {(int)e.Result} tables copied.";
+                ProgressStatus = $"Completed. - {(int) e.Result} tables copied.";
             
+            _dialogManager.ShowMessageBox("Copy Completed", ProgressStatus);
+
             IsWorking = false;
             LoadTables();
         }
@@ -214,9 +233,6 @@ namespace CloudSync.ViewModels
         {
             IsSrcChecked = IsDstChecked = false;
             IsSrcOpened = IsDstOpened = false;
-
-            ProgressValue = 0;
-            ProgressStatus = string.Empty;
 
             _srcPanel.Children.RemoveRange(1, _srcPanel.Children.Count - 1);
             _dstPanel.Children.RemoveRange(1, _dstPanel.Children.Count - 1);

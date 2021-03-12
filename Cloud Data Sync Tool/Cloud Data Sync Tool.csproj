@@ -150,6 +150,7 @@
     <Compile Include="Utils\CustomDialogManager.cs" />
     <Compile Include="Utils\DbUtils.cs" />
     <Compile Include="Utils\ICustomDialogManager.cs" />
+    <Compile Include="Utils\MathExtensions.cs" />
     <Compile Include="ViewModels\DialogViewModelBase.cs" />
     <Compile Include="ViewModels\IDialogViewModelBase.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
