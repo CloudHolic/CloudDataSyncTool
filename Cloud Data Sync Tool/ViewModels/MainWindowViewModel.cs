@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +11,7 @@ using CloudSync.Controls;
 using CloudSync.Models;
 using CloudSync.Utils;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CloudSync.ViewModels
 {
@@ -55,11 +57,32 @@ namespace CloudSync.ViewModels
             set { Set(() => DstDb, value); }
         }
 
+        public bool IsWorking
+        {
+            get { return Get(() => IsWorking); }
+            set { Set(() => IsWorking, value); }
+        }
+
+        public int ProgressValue
+        {
+            get { return Get(() => ProgressValue); }
+            set { Set(() => ProgressValue, value); }
+        }
+
+        public string ProgressStatus
+        {
+            get { return Get(() => ProgressStatus); }
+            set { Set(() => ProgressStatus, value); }
+        }
+
         public MainWindowViewModel(Tuple<Connection, Connection> cons, Tuple<StackPanel, StackPanel> panels)
         {
             (_srcConnection, _dstConnection) = cons;
             (_srcPanel, _dstPanel) = panels;
             IsSrcOpened = IsDstOpened = false;
+            IsWorking = false;
+            
+            BulkCopyWorker.Instance.InitWorker(CopyCompleted, ProgressChanged);
 
             LoadTables();
         }
@@ -92,29 +115,46 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => CopyCommand, new RelayCommand(() =>
                 {
-                    //var dbUtil = new DbUtils(_srcConnection, _dstConnection);
-                    //var tablePath = $"{CurTable.ParentName}.{CurTable.Name}";
+                    if (IsWorking)
+                    {
+                        BulkCopyWorker.Instance.CancelWorker();
+                        return;
+                    }
 
-                    var items = new List<string>();
+                    IsWorking = true;
+
+                    string srcSchema = "", dstSchema = "";
+
+                    var tables = new List<string>();
                     foreach (var child in _srcPanel.Children)
                     {
-                        var tableList = ((DependencyObject)child).FindChild<ListBox>();
-
-                        if (tableList != null)
-                            items.AddRange(tableList.SelectedItems.Cast<string>());
+                        var schemaViewModel = (SchemaEntryViewModel)((SchemaEntry)child).DataContext;
+                        if (schemaViewModel.IsChecked)
+                        {
+                            srcSchema = schemaViewModel.SchemaName;
+                            var tableList = ((DependencyObject)child).FindChild<ListBox>();
+                            if (tableList != null && tableList.SelectedItems.Count > 0)
+                                tables.AddRange(tableList.SelectedItems.Cast<string>());
+                        }
                     }
-                    /*
-                    var tables = dbUtil.FindTables(srcSchema);
-                    var files = tables.Select(table => $@"D:\DbDumps\{srcSchema}-{table}.csv").ToList();
-                    var tableList = TableName.GetTableNameList(tables, files);
 
-                    if (tableList != null && tableList.Count > 0)
+                    foreach (var child in _dstPanel.Children)
                     {
-                        dbUtil.SaveTables(srcSchema, tableList);
-                        dbUtil.BulkLoad(srcSchema, dstSchema, tableList, false);
+                        var schemaViewModel = (SchemaEntryViewModel)((SchemaEntry)child).DataContext;
+                        if (schemaViewModel.IsChecked)
+                            dstSchema = schemaViewModel.SchemaName;
                     }
-                    */
-                    LoadTables();
+
+                    BulkCopyWorker.Instance.StartWorker(new WorkerArgs
+                    {
+                        SrcConnection = _srcConnection,
+                        DstConnection = _dstConnection,
+                        SrcSchemaName = srcSchema,
+                        DstSchemaName = dstSchema,
+                        DumpDirectory = @"D:\DbDumps",
+                        SrcTables = tables,
+                        DeleteFile = true
+                    });
                 }));
             }
         }
@@ -130,7 +170,7 @@ namespace CloudSync.ViewModels
                     _dstConnection = new Connection(temp);
 
                     LoadTables();
-                }));
+                }, () => !IsWorking));
             }
         }
 
@@ -147,12 +187,37 @@ namespace CloudSync.ViewModels
                         (_srcConnection, _dstConnection) = result;
                         LoadTables();
                     }
-                }));
+                }, () => !IsWorking));
             }
+        }
+
+        private void CopyCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+                ProgressStatus = "Cancelled. - " + ProgressStatus;
+            else if (e.Error != null)
+                ProgressStatus = "Error occurred. - " + e.Error.Message;
+            else
+                ProgressStatus = $"Completed. - {(int)e.Result} tables copied.";
+            
+            IsWorking = false;
+            LoadTables();
+        }
+
+        private void ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            ProgressValue = e.ProgressPercentage;
+            ProgressStatus = (string) e.UserState;
         }
 
         private void LoadTables()
         {
+            IsSrcChecked = IsDstChecked = false;
+            IsSrcOpened = IsDstOpened = false;
+
+            ProgressValue = 0;
+            ProgressStatus = string.Empty;
+
             _srcPanel.Children.RemoveRange(1, _srcPanel.Children.Count - 1);
             _dstPanel.Children.RemoveRange(1, _dstPanel.Children.Count - 1);
 

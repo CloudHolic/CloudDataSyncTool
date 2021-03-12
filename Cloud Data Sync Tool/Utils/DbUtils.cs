@@ -92,101 +92,105 @@ namespace CloudSync.Utils
             return result[0]["Create Table"].ToString();
         }
 
-        public void SaveTables(string schemaName, List<TableName> tableNameList)
+        public string SaveTable(string schemaName, string tableName, string dumpDirectory)
         {
             try
             {
                 //var stopwatch = new Stopwatch();
+
+                if (string.IsNullOrWhiteSpace(schemaName) || string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(dumpDirectory))
+                    throw new ArgumentNullException();
+
+                if (!Directory.Exists(dumpDirectory))
+                    throw new DirectoryNotFoundException();
+
+                var fileName = Path.Combine(dumpDirectory, $@"{schemaName}-{tableName}.csv");
+
                 using (var connection = ConnectionFactory(_srcString))
                 {
-                    foreach (var table in tableNameList)
+                    //stopwatch.Restart();
+
+                    var records = connection.Query($"select * from {schemaName}.{tableName}").ToList();
+
+                    using (var streamWriter = new StreamWriter(fileName))
+                    using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture))
                     {
-                        if (string.IsNullOrEmpty(table.FileName) || string.IsNullOrEmpty(table.Table))
-                            throw new ArgumentNullException();
-
-                        //stopwatch.Restart();
-
-                        var records = connection.Query($"select * from {schemaName}.{table.Table}").ToList();
-
-                        using (var streamWriter = new StreamWriter(table.FileName))
-                        using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture))
-                        {
-                            var options = new TypeConverterOptions { Formats = new[] { "yyyy/MM/dd" } };
-                            csvWriter.Context.TypeConverterOptionsCache.AddOptions<DateTime>(options);
-                            csvWriter.WriteRecords(records);
-                        }
-
-                        //Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
+                        var options = new TypeConverterOptions { Formats = new[] { "yyyy/MM/dd" } };
+                        csvWriter.Context.TypeConverterOptionsCache.AddOptions<DateTime>(options);
+                        csvWriter.WriteRecords(records);
                     }
+                    
+                    //Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
+                    return fileName;
                 }
                 //stopwatch.Stop();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
+                return string.Empty;
             }
         }
 
-        public List<int> BulkLoad(string srcSchema, string destSchema, List<TableName> tableNameList, bool deleteFiles = true)
+        public int BulkLoad(string srcSchemaName, string destSchemaName, string tableName, string dumpFileName, bool deleteFile = true)
         {
             try
             {
-                var countList = new List<int>();
                 //var stopwatch = new Stopwatch();
 
+                if (string.IsNullOrWhiteSpace(srcSchemaName) || string.IsNullOrWhiteSpace(destSchemaName) ||
+                    string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(dumpFileName))
+                    throw new ArgumentNullException();
+
+                if (!File.Exists(dumpFileName))
+                    throw new FileNotFoundException();
+
+                if (!(Path.HasExtension(dumpFileName) && Path.GetExtension(dumpFileName) == ".csv"))
+                    throw new FileFormatException();
+                
                 using (var connection = ConnectionFactory(_destString))
                 {
                     //stopwatch.Start();
 
                     connection.Execute("set global local_infile = true");
                     connection.Execute("set foreign_key_checks = 0");
-                    foreach (var table in tableNameList)
-                    {
-                        if (string.IsNullOrEmpty(table.FileName) || string.IsNullOrEmpty(table.Table))
-                            throw new ArgumentNullException();
-
-                        var createQuery = connection.Query($"show create table {srcSchema}.{table.Table}").ToList()
-                            .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
-                        connection.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchema}."));
-                    }
+                    
+                    var createQuery = connection.Query($"show create table {srcSchemaName}.{tableName}").ToList()
+                        .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
+                    connection.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
 
                     //Console.WriteLine($@"Tables created. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-
-                    foreach (var table in tableNameList)
+                    
+                    //stopwatch.Restart();
+                    
+                    var bulkLoader = new MySqlBulkLoader(connection)
                     {
-                        //stopwatch.Restart();
+                        Local = true,
+                        TableName = $"{destSchemaName}.{tableName}",
+                        FieldTerminator = ",",
+                        LineTerminator = "\n",
+                        FileName = dumpFileName,
+                        NumberOfLinesToSkip = 1,
+                        ConflictOption = MySqlBulkLoaderConflictOption.Replace
+                    };
 
-                        var bulkLoader = new MySqlBulkLoader(connection)
-                        {
-                            Local = true,
-                            TableName = $"{destSchema}.{table.Table}",
-                            FieldTerminator = ",",
-                            LineTerminator = "\n",
-                            FileName = table.FileName,
-                            NumberOfLinesToSkip = 1,
-                            ConflictOption = MySqlBulkLoaderConflictOption.Replace
-                        };
-
-                        var count = bulkLoader.Load();
-                        countList.Add(count);
-                        if (deleteFiles)
-                            File.Delete(table.FileName);
-
-                        //Console.WriteLine($@"Table '{table.Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-                    }
+                    var count = bulkLoader.Load();
+                    if (deleteFile)
+                        File.Delete(dumpFileName);
+                    
+                    //Console.WriteLine($@"Table '{table.Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
                     
                     connection.Execute("set foreign_key_checks = 1");
                     connection.Execute("set global local_infile = false");
                     //stopwatch.Stop();
 
-                    return countList;
+                    return count;
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return null;
+                return 0;
             }
         }
     }
