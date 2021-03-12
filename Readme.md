@@ -1,0 +1,1 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/cloudholic/clouddatasynctool/badge?s=87fd9a6b38b570b76bddbed1acef6bc7a04cbd3c)](https://www.codefactor.io/repository/github/cloudholic/clouddatasynctool)
