@@ -234,8 +234,8 @@ namespace CloudSync.ViewModels
             IsSrcChecked = IsDstChecked = false;
             IsSrcOpened = IsDstOpened = false;
 
-            _srcPanel.Children.RemoveRange(1, _srcPanel.Children.Count - 1);
-            _dstPanel.Children.RemoveRange(1, _dstPanel.Children.Count - 1);
+            _srcPanel.Children.Clear();
+            _dstPanel.Children.Clear();
 
             var dbUtil = new DbUtils(_srcConnection, _dstConnection);
             

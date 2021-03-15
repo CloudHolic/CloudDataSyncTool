@@ -42,6 +42,7 @@ namespace CloudSync.Utils
             using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
             {
                 schemaList = connection.Query<string>("select SCHEMA_NAME from information_schema.SCHEMATA").ToList();
+                schemaList.Sort();
             }
 
             return schemaList;

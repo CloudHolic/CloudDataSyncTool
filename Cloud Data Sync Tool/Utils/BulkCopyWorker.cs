@@ -80,7 +80,7 @@ namespace CloudSync.Utils
                 }
 
                 //stopWatch.Restart();
-                worker.ReportProgress((int)Math.Ceiling(progress).Clamp(0, 100), $@"Loading table {table}.");
+                worker.ReportProgress((int)Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
                 var dumpFile = dbUtil.SaveTable(args.SrcSchemaName, table, args.DumpDirectory);
                 progress += step;
                 //worker.ReportProgress(progress, $@"Table '{args.SrcSchemaName}.{table}' saved. Elapsed time: {stopWatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
