@@ -8,7 +8,7 @@
                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                  xmlns:cb="clr-namespace:CloudSync.Behaviors"
                  mc:Ignorable="d"
-                 Title="Cloud Data Sync Tool" Height="500" Width="800" WindowStartupLocation="CenterScreen">
+                 Title="Cloud Data Sync Tool" Height="500" Width="800" WindowStartupLocation="CenterScreen" TitleCharacterCasing="Normal">
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
