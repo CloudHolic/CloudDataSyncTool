@@ -255,7 +255,7 @@ namespace CloudSync.ViewModels
             foreach (var schema in dstSchemas.Where(schema => !_systemSchemas.Contains(schema)))
             {
                 var dstList = new TableList {SchemaName = schema};
-                foreach (var table in dbUtil.FindTables(schema))
+                foreach (var table in dbUtil.FindTables(schema, false))
                     dstList.Tables.Add(table);
                 _dstPanel.Children.Add(new SchemaEntry(dstList, false));
             }

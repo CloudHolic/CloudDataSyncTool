@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using CloudSync.Models;
 using CsvHelper;
+using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using Dapper;
 using MySqlConnector;
@@ -25,7 +25,9 @@ namespace CloudSync.Utils
 
         private static string MakeConnectionString(Connection conString)
         {
-            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};AllowLoadLocalInfile=true";
+            // Allow User Variables=true;SslMode=VerifyCA;
+            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};"
+                   + "AllowLoadLocalInfile=true;Allow User Variables=true;SslMode=VerifyCA;SslCa=ca.pem;";
         }
 
         private static MySqlConnection ConnectionFactory(string connString)
@@ -54,7 +56,8 @@ namespace CloudSync.Utils
 
             using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
             {
-                tableList = connection.Query<string>("select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = @Schema and TABLE_TYPE != 'VIEW'",
+                tableList = connection.Query<string>("select TABLE_NAME from information_schema.TABLES "
+                                                     + "where TABLE_SCHEMA = @Schema and TABLE_TYPE != 'VIEW'",
                     new { Schema = schemaName }).ToList();
             }
 
@@ -67,8 +70,9 @@ namespace CloudSync.Utils
 
             using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
             {
-                var rawResult = connection.Query("select COLUMN_NAME, COLUMN_TYPE from information_schema.COLUMNS where TABLE_SCHEMA = @Schema AND TABLE_NAME = @Table",
-                    new { Schema = schemaName, Table = tableName }).ToList();
+                var rawResult = connection.Query("select COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE from information_schema.COLUMNS "
+                                                 + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table",
+                    new {Schema = schemaName, Table = tableName}).ToList();
                 result = rawResult.Select(x => (IDictionary<string, object>)x).ToList();
             }
 
@@ -76,7 +80,7 @@ namespace CloudSync.Utils
             {
                 Name = column["COLUMN_NAME"].ToString(),
                 Type = column["COLUMN_TYPE"].ToString(),
-                MaxLength = 0
+                Nullable = column["IS_NULLABLE"].ToString() == "YES"
             }).ToList();
         }
 
@@ -93,7 +97,7 @@ namespace CloudSync.Utils
             return result[0]["Create Table"].ToString();
         }
 
-        public string SaveTable(string schemaName, string tableName, string dumpDirectory)
+        public List<string> SaveTable(string schemaName, string tableName, string dumpDirectory)
         {
             try
             {
@@ -105,31 +109,49 @@ namespace CloudSync.Utils
                 if (!Directory.Exists(dumpDirectory))
                     throw new DirectoryNotFoundException();
 
-                var fileName = Path.Combine(dumpDirectory, $@"{schemaName}-{tableName}.csv");
+                var baseFileName = $@"{schemaName}-{tableName}";
+                var fileNameList = new List<string>();
 
                 using (var connection = ConnectionFactory(_srcString))
                 {
                     //stopwatch.Restart();
+                    var count = connection.Query<int>($"select count(*) from {schemaName}.{tableName}").First();
+                    var pk = connection.Query<string>("select column_name from information_schema.COLUMNS "
+                                                      + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table and COLUMN_KEY = 'PRI'",
+                        new { Schema = schemaName, Table = tableName }).ToList();
 
-                    var records = connection.Query($"select * from {schemaName}.{tableName}").ToList();
+                    var loopCount = count / 1000000 + 1;
+                    var config = new CsvConfiguration(CultureInfo.CurrentCulture);
+                    var fileName = Path.Combine(dumpDirectory, $@"{baseFileName}.csv");
 
-                    using (var streamWriter = new StreamWriter(fileName))
-                    using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.CurrentCulture))
+                    for (var i = 0; i < loopCount; i++)
                     {
-                        var options = new TypeConverterOptions { Formats = new[] { "yyyy/MM/dd" } };
-                        csvWriter.Context.TypeConverterOptionsCache.AddOptions<DateTime>(options);
-                        csvWriter.WriteRecords(records);
+                        var records = connection.Query($"select * from {schemaName}.{tableName} "
+                                                       + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}");
+
+                        //var fileName = Path.Combine(dumpDirectory, $@"{baseFileName}.csv");
+                        config.HasHeaderRecord = i == 0;
+
+                        using (var streamWriter = new StreamWriter(fileName, true))
+                        using (var csvWriter = new CsvWriter(streamWriter, config))
+                        {
+                            var options = new TypeConverterOptions {Formats = new[] {"yyyy/MM/dd HH:mm:ss.ffffff"}};
+                            csvWriter.Context.TypeConverterOptionsCache.AddOptions<DateTime>(options);
+                            csvWriter.WriteRecords(records);
+                        }
+                        //fileNameList.Add(fileName);
                     }
                     
                     //Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-                    return fileName;
+                    fileNameList.Add(fileName);
+                    return fileNameList;
                 }
                 //stopwatch.Stop();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return string.Empty;
+                return new List<string>();
             }
         }
 
@@ -148,16 +170,30 @@ namespace CloudSync.Utils
 
                 if (!(Path.HasExtension(dumpFileName) && Path.GetExtension(dumpFileName) == ".csv"))
                     throw new FileFormatException();
+
+                //var queryString = MakeLoadQuery(dumpFileName, srcSchemaName, destSchemaName, tableName);
+
+                string createQuery;
+                using (var connection = ConnectionFactory(_srcString))
+                {
+                    createQuery = connection.Query($"show create table {srcSchemaName}.{tableName}").ToList()
+                        .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
+                }
                 
                 using (var connection = ConnectionFactory(_destString))
                 {
                     //stopwatch.Start();
+                    var sqlMode = connection.Query<string>("select @@SESSION.sql_mode").First();
+                    var noStrictMode = sqlMode.Split(',').Where(mode => mode != "STRICT_TRANS_TABLES")
+                        .Aggregate("", (current, mode) => current + mode + ",");
+                    noStrictMode = noStrictMode.TrimEnd(',');
 
+                    connection.Execute($"set session sql_mode = \"{noStrictMode}\"");
                     connection.Execute("set global local_infile = true");
                     connection.Execute("set foreign_key_checks = 0");
+                    connection.Execute("set autocommit = 0");
+                    connection.Execute("set unique_checks = 0");
                     
-                    var createQuery = connection.Query($"show create table {srcSchemaName}.{tableName}").ToList()
-                        .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
                     connection.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
 
                     //Console.WriteLine($@"Tables created. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
@@ -172,17 +208,30 @@ namespace CloudSync.Utils
                         LineTerminator = "\n",
                         FileName = dumpFileName,
                         NumberOfLinesToSkip = 1,
-                        ConflictOption = MySqlBulkLoaderConflictOption.Replace
+                        ConflictOption = MySqlBulkLoaderConflictOption.Replace,
+                        FieldQuotationCharacter = '\"',
+                        FieldQuotationOptional = false
                     };
-
+                    
                     var count = bulkLoader.Load();
+
+                    /*var count = 0;
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        count = connection.Execute(queryString);
+                        transaction.Commit();
+                    }*/
+
                     if (deleteFile)
                         File.Delete(dumpFileName);
                     
                     //Console.WriteLine($@"Table '{table.Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-                    
-                    connection.Execute("set foreign_key_checks = 1");
+
+                    connection.Execute($"set session sql_mode = \"{sqlMode}\"");
                     connection.Execute("set global local_infile = false");
+                    connection.Execute("set foreign_key_checks = 1");
+                    connection.Execute("set autocommit = 1");
+                    connection.Execute("set unique_checks = 1");
                     //stopwatch.Stop();
 
                     return count;
@@ -193,6 +242,38 @@ namespace CloudSync.Utils
                 Console.WriteLine(e);
                 return 0;
             }
+        }
+
+        private string MakeLoadQuery(string dumpFileName, string srcSchemaName, string dstSchemaName, string tableName)
+        {
+            var columns = FindColumns(srcSchemaName, tableName, false);
+            var query = $"load data local infile '{dumpFileName}' "
+                        + $"replace into table {dstSchemaName}.{tableName} "
+                        + "fields terminated by ',' optionally enclosed by '\"'"
+                        + "lines terminated by '\n'"
+                        + "ignore 1 lines (";
+
+            for (var i = 0; i < columns.Count; i++)
+            {
+                query += "@var" + $"{i + 1}";
+                if (i != columns.Count - 1)
+                    query += ", ";
+            }
+
+            query += ") set ";
+            
+            for(var i = 0; i < columns.Count; i++)
+            {
+                if (columns[i].Type == "bit(1)")
+                    query += $"{columns[i].Name} = CAST(CONV(@var{i + 1}, 10, 2) as unsigned),";
+                else if (columns[i].Nullable)
+                    query += $"{columns[i].Name} = NULLIF(@var{i + 1},''),";
+                else
+                    query += $"{columns[i].Name} = @var{i + 1},";
+            }
+
+            query = query.TrimEnd(',');
+            return query;
         }
     }
 }

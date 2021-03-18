@@ -86,9 +86,12 @@ namespace CloudSync.Utils
                 //worker.ReportProgress(progress, $@"Table '{args.SrcSchemaName}.{table}' saved. Elapsed time: {stopWatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
                 
                 //stopWatch.Restart();
-                worker.ReportProgress((int)Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
-                var count = dbUtil.BulkLoad(args.SrcSchemaName, args.DstSchemaName, table, dumpFile, args.DeleteFile);
-                progress += step;
+                foreach (var file in dumpFile)
+                {
+                    worker.ReportProgress((int) Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
+                    var count = dbUtil.BulkLoad(args.SrcSchemaName, args.DstSchemaName, table, file, args.DeleteFile);
+                    progress += step / dumpFile.Count;
+                }
                 //worker.ReportProgress(progress, $@"Table '{args.DstSchemaName}.{table}' loaded. Count: {count}, Elapsed time: {stopWatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
 
                 copiedTables++;
