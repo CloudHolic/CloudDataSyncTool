@@ -27,7 +27,7 @@ namespace CloudSync.Utils
         {
             // Allow User Variables=true;SslMode=VerifyCA;
             return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};"
-                   + "AllowLoadLocalInfile=true;Allow User Variables=true;SslMode=VerifyCA;SslCa=ca.pem;";
+                   + "AllowLoadLocalInfile=true;Allow User Variables=true;";
         }
 
         private static MySqlConnection ConnectionFactory(string connString)
@@ -97,7 +97,7 @@ namespace CloudSync.Utils
             return result[0]["Create Table"].ToString();
         }
 
-        public List<string> SaveTable(string schemaName, string tableName, string dumpDirectory)
+        public string SaveTable(string schemaName, string tableName, string dumpDirectory)
         {
             try
             {
@@ -110,7 +110,6 @@ namespace CloudSync.Utils
                     throw new DirectoryNotFoundException();
 
                 var baseFileName = $@"{schemaName}-{tableName}";
-                var fileNameList = new List<string>();
 
                 using (var connection = ConnectionFactory(_srcString))
                 {
@@ -122,6 +121,7 @@ namespace CloudSync.Utils
 
                     var loopCount = count / 1000000 + 1;
                     var config = new CsvConfiguration(CultureInfo.CurrentCulture);
+
                     var fileName = Path.Combine(dumpDirectory, $@"{baseFileName}.csv");
 
                     for (var i = 0; i < loopCount; i++)
@@ -129,7 +129,6 @@ namespace CloudSync.Utils
                         var records = connection.Query($"select * from {schemaName}.{tableName} "
                                                        + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}");
 
-                        //var fileName = Path.Combine(dumpDirectory, $@"{baseFileName}.csv");
                         config.HasHeaderRecord = i == 0;
 
                         using (var streamWriter = new StreamWriter(fileName, true))
@@ -139,19 +138,17 @@ namespace CloudSync.Utils
                             csvWriter.Context.TypeConverterOptionsCache.AddOptions<DateTime>(options);
                             csvWriter.WriteRecords(records);
                         }
-                        //fileNameList.Add(fileName);
                     }
                     
                     //Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-                    fileNameList.Add(fileName);
-                    return fileNameList;
+                    return fileName;
                 }
                 //stopwatch.Stop();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new List<string>();
+                return string.Empty;
             }
         }
 
@@ -197,9 +194,13 @@ namespace CloudSync.Utils
                     connection.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
 
                     //Console.WriteLine($@"Tables created. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-                    
+
                     //stopwatch.Restart();
-                    
+
+                    // TODO: 0 should be false in bit(1).
+                    // TODO: Empty value should be NULL.
+                    // TODO: If data itself has '\n', DB doesn't work correctly.
+
                     var bulkLoader = new MySqlBulkLoader(connection)
                     {
                         Local = true,
