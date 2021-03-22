@@ -7,7 +7,7 @@
                    xmlns:cb="clr-namespace:CloudSync.Behaviors"
                    xmlns:ctrls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                    xmlns:viewModels="clr-namespace:CloudSync.ViewModels"
-                   mc:Ignorable="d" Width="710" Height="605" AllowDrop="True"
+                   mc:Ignorable="d" Width="710" Height="605"
                    Title="Login" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" TitleCharacterCasing="Normal">
     <ctrls:MetroWindow.DataContext>
         <viewModels:OpenWindowViewModel/>

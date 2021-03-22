@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -70,6 +71,8 @@ namespace CloudSync.Models
             }
         }
         #endregion
+
+        public string StringPassword { get; set; }
         
         public Connection()
         {
@@ -77,6 +80,7 @@ namespace CloudSync.Models
             Port = 3306;
             Id = Name = "";
             Password = new SecureString();
+            StringPassword = "";
         }
 
         public Connection(string id, string password, string host = "localhost", int port = 3306, string database = "")
@@ -85,6 +89,7 @@ namespace CloudSync.Models
             Port = port;
             Id = id;
             Password = ConvertToSecureString(password);
+            StringPassword = password;
             Name = database;
         }
 
@@ -94,6 +99,7 @@ namespace CloudSync.Models
             Port = prevConnection.Port;
             Id = prevConnection.Id;
             Password = prevConnection.Password;
+            StringPassword = prevConnection.StringPassword;
             Name = prevConnection.Name;
         }
 
@@ -106,7 +112,7 @@ namespace CloudSync.Models
         }
         #endregion
 
-        private SecureString ConvertToSecureString(string password)
+        private SecureString ConvertToSecureString(string password = "")
         {
             if (string.IsNullOrEmpty(password))
                 return new SecureString();

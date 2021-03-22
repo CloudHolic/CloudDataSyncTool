@@ -197,7 +197,7 @@ namespace CloudSync.Utils
 
                     //stopwatch.Restart();
 
-                    // TODO: 0 should be false in bit(1).
+                    // TODO: '0' should be false in bit(1).
                     // TODO: Empty value should be NULL.
                     // TODO: If data itself has '\n', DB doesn't work correctly.
 
