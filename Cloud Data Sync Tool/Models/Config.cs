@@ -12,6 +12,10 @@ namespace CloudSync.Models
 
         public static int MainY { get; set; }
 
+        public static int MaxRows { get; set; }
+
+        public static int AlertRows { get; set; }
+
         public static Dictionary<string, Connection> Connections { get; set; }
     }
 }

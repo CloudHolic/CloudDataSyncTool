@@ -62,11 +62,14 @@ namespace CloudSync.Utils
 
         public int BulkCopy(string srcSchemaName, string destSchemaName, string tableName)
         {
+            var copiedRows = 0;
+
             try
             {
                 //var stopwatch = new Stopwatch();
 
-                if (string.IsNullOrEmpty(srcSchemaName) || string.IsNullOrEmpty(destSchemaName) || string.IsNullOrEmpty(tableName))
+                if (string.IsNullOrEmpty(srcSchemaName) || string.IsNullOrEmpty(destSchemaName) ||
+                    string.IsNullOrEmpty(tableName))
                     throw new ArgumentNullException();
 
                 using (var srcConn = ConnectionFactory(_srcString))
@@ -74,12 +77,12 @@ namespace CloudSync.Utils
                     //stopwatch.Restart();
                     var count = srcConn.Query<int>($"select count(*) from {srcSchemaName}.{tableName}").First();
                     var createQuery = srcConn.Query($"show create table {srcSchemaName}.{tableName}").ToList()
-                        .Select(x => (IDictionary<string, object>) x).ToList()[0]["Create Table"].ToString();
+                        .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
                     var pk = srcConn.Query<string>($"select column_name from information_schema.COLUMNS "
                                                    + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table and COLUMN_KEY = 'PRI'",
                         new { Schema = srcSchemaName, Table = tableName }).ToList();
                     var columns = FindColumns(srcSchemaName, tableName);
-                    
+
                     var loopCount = count / 1000000 + 1;
 
                     using (var dstConn = ConnectionFactory(_destString))
@@ -94,24 +97,26 @@ namespace CloudSync.Utils
                         dstConn.Execute("set foreign_key_checks = 0");
                         dstConn.Execute("set autocommit = 0");
                         dstConn.Execute("set unique_checks = 0");
-                        
+
                         dstConn.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
 
-                        var transaction = dstConn.BeginTransaction();
-                        var bulkCopy = new MySqlBulkCopy(dstConn, transaction)
+                        //var transaction = dstConn.BeginTransaction();
+                        var bulkCopy = new MySqlBulkCopy(dstConn /*, transaction*/)
                         {
                             DestinationTableName = $"{destSchemaName}.{tableName}"
                         };
 
                         for (var i = 0; i < loopCount; i++)
                         {
-                            var rawRecord = srcConn.Query($"select * from {srcSchemaName}.{tableName} "
-                                                        + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}");
-                            var result = rawRecord.Select(x => (IDictionary<string, object>) x).ToList();
-                            var table = ConvertToDataTable(result, columns);
+                            var record = srcConn.Query($"select * from {srcSchemaName}.{tableName} "
+                                                       + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}")
+                                .Select(x => (IDictionary<string, object>)x).ToList();
+                            var table = ConvertToDataTable(record, columns);
                             bulkCopy.WriteToServer(table);
+
+                            copiedRows += record.Count;
                         }
-                        transaction.Commit();
+                        //transaction.Commit();
 
                         dstConn.Execute($"set session sql_mode = \"{sqlMode}\"");
                         dstConn.Execute("set global local_infile = false");
@@ -119,14 +124,14 @@ namespace CloudSync.Utils
                         dstConn.Execute("set autocommit = 1");
                         dstConn.Execute("set unique_checks = 1");
                     }
-                }
 
-                return 0;
+                    return copiedRows;
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return 0;
+                return copiedRows;
             }
         }
 
@@ -150,7 +155,7 @@ namespace CloudSync.Utils
             }).ToList();
         }
 
-        private static DataTable ConvertToDataTable(List<IDictionary<string, object>> data, List<ColumnType> types)
+        private static DataTable ConvertToDataTable(IEnumerable<IDictionary<string, object>> data, IReadOnlyCollection<ColumnType> types)
         {
             var table = new DataTable();
 
