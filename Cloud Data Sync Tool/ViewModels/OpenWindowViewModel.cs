@@ -32,11 +32,11 @@ namespace CloudSync.ViewModels
             DstCon = new Connection();
         }
 
-        public ICommand SaveCommand
+        public ICommand OkCommand
         {
             get
             {
-                return Get(() => SaveCommand, new RelayCommand<MetroWindow>(window =>
+                return Get(() => OkCommand, new RelayCommand<MetroWindow>(window =>
                 {
                     if (string.IsNullOrEmpty(SrcCon.Host))
                         SrcCon.Host = "localhost";

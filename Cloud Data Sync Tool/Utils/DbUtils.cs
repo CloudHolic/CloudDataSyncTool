@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace CloudSync.Utils
 
         private static string MakeConnectionString(Connection conString)
         {
-            // Allow User Variables=true;SslMode=VerifyCA;
+            // SslMode=VerifyCA;
             return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};"
                    + "AllowLoadLocalInfile=true;Allow User Variables=true;";
         }
@@ -64,7 +65,77 @@ namespace CloudSync.Utils
             return tableList;
         }
 
-        public List<ColumnType> FindColumns(string schemaName, string tableName, bool isSrc = true)
+        public int BulkCopy(string srcSchemaName, string destSchemaName, string tableName)
+        {
+            try
+            {
+                //var stopwatch = new Stopwatch();
+
+                if (string.IsNullOrEmpty(srcSchemaName) || string.IsNullOrEmpty(destSchemaName) || string.IsNullOrEmpty(tableName))
+                    throw new ArgumentNullException();
+
+                using (var srcConn = ConnectionFactory(_srcString))
+                {
+                    //stopwatch.Restart();
+                    var count = srcConn.Query<int>($"select count(*) from {srcSchemaName}.{tableName}").First();
+                    var createQuery = srcConn.Query($"show create table {srcSchemaName}.{tableName}").ToList()
+                        .Select(x => (IDictionary<string, object>) x).ToList()[0]["Create Table"].ToString();
+                    var pk = srcConn.Query<string>($"select column_name from information_schema.COLUMNS "
+                                                   + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table and COLUMN_KEY = 'PRI'",
+                        new { Schema = srcSchemaName, Table = tableName }).ToList();
+                    var columns = FindColumns(srcSchemaName, tableName);
+                    
+                    var loopCount = count / 1000000 + 1;
+
+                    using (var dstConn = ConnectionFactory(_destString))
+                    {
+                        var sqlMode = dstConn.Query<string>("select @@SESSION.sql_mode").First();
+                        var noStrictMode = sqlMode.Split(',').Where(mode => mode != "STRICT_TRANS_TABLES")
+                            .Aggregate("", (current, mode) => current + mode + ",");
+                        noStrictMode = noStrictMode.TrimEnd(',');
+
+                        dstConn.Execute($"set session sql_mode = \"{noStrictMode}\"");
+                        dstConn.Execute("set global local_infile = true");
+                        dstConn.Execute("set foreign_key_checks = 0");
+                        dstConn.Execute("set autocommit = 0");
+                        dstConn.Execute("set unique_checks = 0");
+                        
+                        dstConn.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
+
+                        var transaction = dstConn.BeginTransaction();
+                        var bulkCopy = new MySqlBulkCopy(dstConn, transaction)
+                        {
+                            DestinationTableName = $"{destSchemaName}.{tableName}"
+                        };
+
+                        for (var i = 0; i < loopCount; i++)
+                        {
+                            var rawRecord = srcConn.Query($"select * from {srcSchemaName}.{tableName} "
+                                                        + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}");
+                            var result = rawRecord.Select(x => (IDictionary<string, object>) x).ToList();
+                            var table = ConvertToDataTable(result, columns);
+                            bulkCopy.WriteToServer(table);
+                        }
+                        transaction.Commit();
+
+                        dstConn.Execute($"set session sql_mode = \"{sqlMode}\"");
+                        dstConn.Execute("set global local_infile = false");
+                        dstConn.Execute("set foreign_key_checks = 1");
+                        dstConn.Execute("set autocommit = 1");
+                        dstConn.Execute("set unique_checks = 1");
+                    }
+                }
+
+                return 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 0;
+            }
+        }
+
+        private List<ColumnType> FindColumns(string schemaName, string tableName, bool isSrc = true)
         {
             List<IDictionary<string, object>> result;
 
@@ -72,7 +143,7 @@ namespace CloudSync.Utils
             {
                 var rawResult = connection.Query("select COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE from information_schema.COLUMNS "
                                                  + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table",
-                    new {Schema = schemaName, Table = tableName}).ToList();
+                    new { Schema = schemaName, Table = tableName }).ToList();
                 result = rawResult.Select(x => (IDictionary<string, object>)x).ToList();
             }
 
@@ -84,6 +155,24 @@ namespace CloudSync.Utils
             }).ToList();
         }
 
+        private static DataTable ConvertToDataTable(List<IDictionary<string, object>> data, List<ColumnType> types)
+        {
+            var table = new DataTable();
+
+            foreach (var type in types)
+                table.Columns.Add(type.Name);
+            
+            foreach (var item in data)
+            {
+                var row = table.NewRow();
+                foreach (var type in types)
+                    row[type.Name] = item[type.Name];
+                table.Rows.Add(row);
+            }
+            return table;
+        }
+
+        #region Unused Methods
         public string FindCreateSql(string schemaName, string tableName)
         {
             List<IDictionary<string, object>> result;
@@ -134,12 +223,12 @@ namespace CloudSync.Utils
                         using (var streamWriter = new StreamWriter(fileName, true))
                         using (var csvWriter = new CsvWriter(streamWriter, config))
                         {
-                            var options = new TypeConverterOptions {Formats = new[] {"yyyy/MM/dd HH:mm:ss.ffffff"}};
+                            var options = new TypeConverterOptions { Formats = new[] { "yyyy/MM/dd HH:mm:ss.ffffff" } };
                             csvWriter.Context.TypeConverterOptionsCache.AddOptions<DateTime>(options);
                             csvWriter.WriteRecords(records);
                         }
                     }
-                    
+
                     //Console.WriteLine($@"Table '{table.Table}' saved. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
                     return fileName;
                 }
@@ -176,7 +265,7 @@ namespace CloudSync.Utils
                     createQuery = connection.Query($"show create table {srcSchemaName}.{tableName}").ToList()
                         .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
                 }
-                
+
                 using (var connection = ConnectionFactory(_destString))
                 {
                     //stopwatch.Start();
@@ -190,16 +279,16 @@ namespace CloudSync.Utils
                     connection.Execute("set foreign_key_checks = 0");
                     connection.Execute("set autocommit = 0");
                     connection.Execute("set unique_checks = 0");
-                    
+
                     connection.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
 
                     //Console.WriteLine($@"Tables created. Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
 
                     //stopwatch.Restart();
 
-                    // TODO: '0' should be false in bit(1).
-                    // TODO: Empty value should be NULL.
-                    // TODO: If data itself has '\n', DB doesn't work correctly.
+                    // TODO: 1. '0' should be false in bit(1).
+                    // TODO: 2. Empty value should be NULL.
+                    // TODO: 3. If data itself has '\n', DB doesn't work correctly.
 
                     var bulkLoader = new MySqlBulkLoader(connection)
                     {
@@ -213,7 +302,7 @@ namespace CloudSync.Utils
                         FieldQuotationCharacter = '\"',
                         FieldQuotationOptional = false
                     };
-                    
+
                     var count = bulkLoader.Load();
 
                     /*var count = 0;
@@ -225,7 +314,7 @@ namespace CloudSync.Utils
 
                     if (deleteFile)
                         File.Delete(dumpFileName);
-                    
+
                     //Console.WriteLine($@"Table '{table.Table}' loaded. Count: {count}, Elapsed time: {stopwatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
 
                     connection.Execute($"set session sql_mode = \"{sqlMode}\"");
@@ -244,7 +333,7 @@ namespace CloudSync.Utils
                 return 0;
             }
         }
-
+        
         private string MakeLoadQuery(string dumpFileName, string srcSchemaName, string dstSchemaName, string tableName)
         {
             var columns = FindColumns(srcSchemaName, tableName, false);
@@ -262,8 +351,8 @@ namespace CloudSync.Utils
             }
 
             query += ") set ";
-            
-            for(var i = 0; i < columns.Count; i++)
+
+            for (var i = 0; i < columns.Count; i++)
             {
                 if (columns[i].Type == "bit(1)")
                     query += $"{columns[i].Name} = CAST(CONV(@var{i + 1}, 10, 2) as unsigned),";
@@ -276,5 +365,6 @@ namespace CloudSync.Utils
             query = query.TrimEnd(',');
             return query;
         }
+        #endregion
     }
 }

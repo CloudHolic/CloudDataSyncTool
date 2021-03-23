@@ -75,10 +75,10 @@
             </Grid>
         </Grid>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="Test" Margin="10" FontSize="20" BorderThickness="1" Width="100"/>
-            <Button Content="OK" Margin="10" FontSize="20" BorderThickness="1" Width="100"/>
-            <Button Content="Cancel" Margin="10" FontSize="20" BorderThickness="1" Width="100"/>
-            <Button Content="Apply" Margin="10" FontSize="20" BorderThickness="1" Width="100"/>
+            <Button Content="Test" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding TestCommand}"/>
+            <Button Content="OK" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding OkCommand}"/>
+            <Button Content="Cancel" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding CancelCommand}"/>
+            <Button Content="Apply" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding ApplyCommand}"/>
         </StackPanel>
     </Grid>
 </ctrls:MetroWindow>
