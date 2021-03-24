@@ -78,11 +78,12 @@ namespace CloudSync.Utils
                     var count = srcConn.Query<int>($"select count(*) from {srcSchemaName}.{tableName}").First();
                     var createQuery = srcConn.Query($"show create table {srcSchemaName}.{tableName}").ToList()
                         .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
-                    var pk = srcConn.Query<string>($"select column_name from information_schema.COLUMNS "
+                    var pk = srcConn.Query<string>("select column_name from information_schema.COLUMNS "
                                                    + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table and COLUMN_KEY = 'PRI'",
                         new { Schema = srcSchemaName, Table = tableName }).ToList();
                     var columns = FindColumns(srcSchemaName, tableName);
 
+                    //var loopCount = 20;
                     var loopCount = count / 1000000 + 1;
 
                     using (var dstConn = ConnectionFactory(_destString))
@@ -99,24 +100,27 @@ namespace CloudSync.Utils
                         dstConn.Execute("set unique_checks = 0");
 
                         dstConn.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
-
-                        //var transaction = dstConn.BeginTransaction();
-                        var bulkCopy = new MySqlBulkCopy(dstConn /*, transaction*/)
-                        {
-                            DestinationTableName = $"{destSchemaName}.{tableName}"
-                        };
-
+                        
                         for (var i = 0; i < loopCount; i++)
                         {
                             var record = srcConn.Query($"select * from {srcSchemaName}.{tableName} "
                                                        + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}")
                                 .Select(x => (IDictionary<string, object>)x).ToList();
                             var table = ConvertToDataTable(record, columns);
-                            bulkCopy.WriteToServer(table);
 
-                            copiedRows += record.Count;
+                            using (var transaction = dstConn.BeginTransaction())
+                            {
+                                var bulkCopy = new MySqlBulkCopy(dstConn, transaction)
+                                {
+                                    DestinationTableName = $"{destSchemaName}.{tableName}",
+                                    BulkCopyTimeout = 0
+                                };
+                                bulkCopy.WriteToServer(table);
+
+                                copiedRows += record.Count;
+                                transaction.Commit();
+                            }
                         }
-                        //transaction.Commit();
 
                         dstConn.Execute($"set session sql_mode = \"{sqlMode}\"");
                         dstConn.Execute("set global local_infile = false");
