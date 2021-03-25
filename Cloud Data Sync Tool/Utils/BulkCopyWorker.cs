@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using CloudSync.Models;
 
 namespace CloudSync.Utils
@@ -80,17 +79,6 @@ namespace CloudSync.Utils
                 }
 
                 //stopWatch.Restart();
-                //worker.ReportProgress((int)Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
-                //var dumpFile = dbUtil.SaveTable(args.SrcSchemaName, table, args.DumpDirectory);
-                //progress += step;
-                //worker.ReportProgress(progress, $@"Table '{args.SrcSchemaName}.{table}' saved. Elapsed time: {stopWatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-                
-                //stopWatch.Restart();
-                //worker.ReportProgress((int) Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
-                //var count = dbUtil.BulkLoad(args.SrcSchemaName, args.DstSchemaName, table, dumpFile, args.DeleteFile);
-                //progress += step;
-                //worker.ReportProgress(progress, $@"Table '{args.DstSchemaName}.{table}' loaded. Count: {count}, Elapsed time: {stopWatch.Elapsed.TotalMilliseconds / 1000:0.####}s");
-
                 worker.ReportProgress((int) Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
                 var count = dbUtil.BulkCopy(args.SrcSchemaName, args.DstSchemaName, table);
                 progress += step;

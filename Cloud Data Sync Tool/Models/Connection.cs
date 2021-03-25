@@ -132,5 +132,11 @@ namespace CloudSync.Models
 
             return unsecuredPassword;
         }
+
+        public static Tuple<string, DbSetting> ConvertToDbSetting(Connection connection)
+        {
+            return new Tuple<string, DbSetting>(connection.Name,
+                new DbSetting(connection.Host, connection.Port, connection.Id, connection.GetPassword()));
+        }
     }
 }

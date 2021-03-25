@@ -8,7 +8,7 @@
                    xmlns:ctrls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                    xmlns:viewModels="clr-namespace:CloudSync.ViewModels"
                    mc:Ignorable="d"
-                   Title="Databases" Height="350" Width="605" TitleCharacterCasing="Normal">
+                   Title="Databases" Height="360" Width="680" TitleCharacterCasing="Normal">
     <ctrls:MetroWindow.DataContext>
         <viewModels:DbSelectWindowViewModel/>
     </ctrls:MetroWindow.DataContext>
@@ -18,7 +18,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ComboBox Grid.Row="0" Margin="10"/>
+        <ComboBox Grid.Row="0" Margin="10" FontSize="20" ItemsSource="{Binding Databases}"
+                  SelectedIndex="{Binding CurIdx}"/>
         <Grid Grid.Row="1" Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -75,10 +76,14 @@
             </Grid>
         </Grid>
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="Test" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding TestCommand}"/>
-            <Button Content="OK" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding OkCommand}"/>
-            <Button Content="Cancel" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding CancelCommand}"/>
-            <Button Content="Apply" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding ApplyCommand}"/>
+            <Button Content="Test" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding TestCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
+            <Button Content="Save" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
+            <Button Content="Delete" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding DeleteCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
+            <Button Content="Close" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding CloseCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
         </StackPanel>
     </Grid>
 </ctrls:MetroWindow>

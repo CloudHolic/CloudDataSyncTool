@@ -153,6 +153,7 @@
     <Compile Include="Models\ColumnType.cs" />
     <Compile Include="Models\Config.cs" />
     <Compile Include="Models\Connection.cs" />
+    <Compile Include="Models\DbSetting.cs" />
     <Compile Include="Models\TableList.cs" />
     <Compile Include="Models\WorkerArgs.cs" />
     <Compile Include="Utils\BulkCopyWorker.cs" />

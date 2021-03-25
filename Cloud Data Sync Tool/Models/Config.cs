@@ -16,6 +16,6 @@ namespace CloudSync.Models
 
         public static int AlertRows { get; set; }
 
-        public static Dictionary<string, Connection> Connections { get; set; }
+        public static Dictionary<string, DbSetting> Connections { get; set; }
     }
 }
