@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 using CloudSync.Commands;
+using CloudSync.Contents;
 using CloudSync.Models;
 using MahApps.Metro.Controls;
 
@@ -30,6 +31,18 @@ namespace CloudSync.ViewModels
         {
             SrcCon = new Connection();
             DstCon = new Connection();
+        }
+
+        public ICommand SettingCommand
+        {
+            get
+            {
+                return Get(() => SettingCommand, new RelayCommand(() =>
+                {
+                    var openWindow = new DbSelectWindow();
+                    openWindow.ShowDialog();
+                }));
+            }
         }
 
         public ICommand OkCommand

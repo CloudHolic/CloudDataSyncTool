@@ -151,7 +151,6 @@
     <Compile Include="Events\IEvent.cs" />
     <Compile Include="Events\IEventBus.cs" />
     <Compile Include="Models\ColumnType.cs" />
-    <Compile Include="Models\Config.cs" />
     <Compile Include="Models\Connection.cs" />
     <Compile Include="Models\DbSetting.cs" />
     <Compile Include="Models\TableList.cs" />

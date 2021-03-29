@@ -7,6 +7,7 @@
                    xmlns:cb="clr-namespace:CloudSync.Behaviors"
                    xmlns:ctrls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                    xmlns:viewModels="clr-namespace:CloudSync.ViewModels"
+                   xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                    mc:Ignorable="d" Width="710" Height="605"
                    Title="Login" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" TitleCharacterCasing="Normal">
     <ctrls:MetroWindow.DataContext>
@@ -37,8 +38,9 @@
                              Text="{Binding SrcCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <DockPanel Grid.Column="2">
                         <TextBlock DockPanel.Dock="Left" FontSize="20" VerticalAlignment="Center" Text="Port:"/>
-                        <TextBox Name="SrcPort" Margin="10,0,0,0" HorizontalAlignment="Stretch" FontSize="20" VerticalContentAlignment="Center"
-                                 Text="{Binding SrcCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="PortTextBox_OnPreviewTextInput"/>
+                        <xctk:IntegerUpDown Name="SrcPort" Margin="10,0,0,0" Padding="0,0,5,0" FontSize="20"
+                                            HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                                            Text="{Binding SrcCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </DockPanel>
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
@@ -147,9 +149,11 @@
             </Grid>
         </GroupBox>
         <StackPanel Grid.Row="2" Margin="0,10,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="OK" FontSize="20" Width="200" Margin="0,0,0,10" BorderThickness="1" Command="{Binding OkCommand}"
+            <Button Content="DB Setting" FontSize="20" Width="150" Margin="0,0,25,10" BorderThickness="1" Command="{Binding SettingCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
-            <Button Content="Cancel" FontSize="20" Width="100" BorderThickness="1" Margin="50,0,0,10" Command="{Binding CloseCommand}"
+            <Button Content="OK" FontSize="20" Width="200" Margin="25,0,25,10" BorderThickness="1" Command="{Binding OkCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
+            <Button Content="Cancel" FontSize="20" Width="100" BorderThickness="1" Margin="25,0,0,10" Command="{Binding CloseCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
         </StackPanel>
     </Grid>

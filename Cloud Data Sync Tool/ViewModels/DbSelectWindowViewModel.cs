@@ -1,7 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using CloudSync.Commands;
 using CloudSync.Models;
+using CloudSync.Utils;
 using MahApps.Metro.Controls;
 
 namespace CloudSync.ViewModels
@@ -13,7 +17,7 @@ namespace CloudSync.ViewModels
             get { return Get(() => Conn); }
             set { Set(() => Conn, value); }
         }
-
+        
         public ObservableCollection<string> Databases
         {
             get { return Get(() => Databases); }
@@ -26,32 +30,31 @@ namespace CloudSync.ViewModels
             set { Set(() => CurIdx, value); }
         }
 
+        private readonly List<Connection> _connections;
+
         public DbSelectWindowViewModel()
         {
-            Conn = new Connection();
             Databases = new ObservableCollection<string>();
-            Conn = new Connection();
-            CurIdx = 0;
-        }
-
-        public ICommand TestCommand
-        {
-            get
+            _connections = new List<Connection>();
+            foreach (var item in ConfigManager.Instance.Config.Connections)
             {
-                return Get(() => TestCommand, new RelayCommand(() =>
-                {
-                    
-                }));
+                Databases.Add(item.Key);
+                _connections.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
             }
+
+            Conn = new Connection("", "", "", 0, "");
         }
 
-        public ICommand SaveCommand
+        public ICommand NewCommand
         {
             get
             {
-                return Get(() => SaveCommand, new RelayCommand(() =>
+                return Get(() => NewCommand, new RelayCommand(() =>
                 {
-                    
+                    Databases.Add("New");
+                    _connections.Add(new Connection());
+                    CurIdx = Databases.Count - 1;
+                    Conn = _connections[_connections.Count - 1];
                 }));
             }
         }
@@ -62,7 +65,36 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => DeleteCommand, new RelayCommand(() =>
                 {
+                    Databases.RemoveAt(CurIdx);
+                    _connections.RemoveAt(CurIdx);
+                    CurIdx -= 1;
+                    Conn = CurIdx > -1 ? _connections[CurIdx] : new Connection("", "", "", 0, "");
+                }));
+            }
+        }
 
+        public ICommand TestCommand
+        {
+            get
+            {
+                return Get(() => TestCommand, new RelayCommand(() =>
+                {
+
+                }));
+            }
+        }
+
+        public ICommand SaveCommand
+        {
+            get
+            {
+                return Get(() => SaveCommand, new RelayCommand(() =>
+                {
+                    ConfigManager.Instance.Config.Connections.Clear();
+                    foreach (var (key, conn) in _connections.Select(Connection.ConvertToDbSetting))
+                        ConfigManager.Instance.Config.Connections.Add(key, conn);
+
+                    ConfigManager.Instance.Save();
                 }));
             }
         }
