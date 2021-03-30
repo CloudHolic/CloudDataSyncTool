@@ -12,37 +12,25 @@ namespace CloudSync.ViewModels
 {
     public class DbSelectWindowViewModel : ViewModelBase
     {
-        public Connection Conn
-        {
-            get { return Get(() => Conn); }
-            set { Set(() => Conn, value); }
-        }
-        
-        public ObservableCollection<string> Databases
+        public ObservableCollection<Connection> Databases
         {
             get { return Get(() => Databases); }
             set { Set(() => Databases, value); }
         }
 
-        public int CurIdx
+        public Connection CurItem
         {
-            get { return Get(() => CurIdx); }
-            set { Set(() => CurIdx, value); }
+            get { return Get(() => CurItem); }
+            set { Set(() => CurItem, value); }
         }
-
-        private readonly List<Connection> _connections;
+        
 
         public DbSelectWindowViewModel()
         {
-            Databases = new ObservableCollection<string>();
-            _connections = new List<Connection>();
-            foreach (var item in ConfigManager.Instance.Config.Connections)
-            {
-                Databases.Add(item.Key);
-                _connections.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
-            }
+            Databases = new ObservableCollection<Connection>();
 
-            Conn = new Connection("", "", "", 0, "");
+            foreach (var item in ConfigManager.Instance.Config.Connections)
+                Databases.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
         }
 
         public ICommand NewCommand
@@ -51,10 +39,8 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => NewCommand, new RelayCommand(() =>
                 {
-                    Databases.Add("New");
-                    _connections.Add(new Connection());
-                    CurIdx = Databases.Count - 1;
-                    Conn = _connections[_connections.Count - 1];
+                    Databases.Add(new Connection());
+                    CurItem = Databases.Last();
                 }));
             }
         }
@@ -65,11 +51,10 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => DeleteCommand, new RelayCommand(() =>
                 {
-                    Databases.RemoveAt(CurIdx);
-                    _connections.RemoveAt(CurIdx);
-                    CurIdx -= 1;
-                    Conn = CurIdx > -1 ? _connections[CurIdx] : new Connection("", "", "", 0, "");
-                }));
+                    var idx = Databases.IndexOf(CurItem);
+                    Databases.RemoveAt(idx);
+                    CurItem = Databases[idx - 1];
+                },() => Databases.Count > 0 && CurItem != null));
             }
         }
 
@@ -91,7 +76,7 @@ namespace CloudSync.ViewModels
                 return Get(() => SaveCommand, new RelayCommand(() =>
                 {
                     ConfigManager.Instance.Config.Connections.Clear();
-                    foreach (var (key, conn) in _connections.Select(Connection.ConvertToDbSetting))
+                    foreach (var (key, conn) in Databases.Select(Connection.ConvertToDbSetting))
                         ConfigManager.Instance.Config.Connections.Add(key, conn);
 
                     ConfigManager.Instance.Save();

@@ -76,8 +76,9 @@ namespace CloudSync.Models
         {
             Host = "localhost";
             Port = 3306;
-            Id = Name = "";
+            Id = "";
             Password = new SecureString();
+            Name = "New";
         }
 
         public Connection(string id, string password, string host = "localhost", int port = 3306, string database = "")

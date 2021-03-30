@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using CloudSync.Models;
 using YamlDotNet.Serialization;
@@ -10,18 +11,25 @@ namespace CloudSync.Utils
     {
         public class Settings
         {
+            [YamlMember(typeof(int), Alias = "mainWidth")]
             public int MainWidth { get; set; }
 
+            [YamlMember(typeof(int), Alias = "mainHeight")]
             public int MainHeight { get; set; }
 
+            [YamlMember(typeof(int), Alias = "mainX")]
             public int MainX { get; set; }
 
+            [YamlMember(typeof(int), Alias = "mainY")]
             public int MainY { get; set; }
 
+            [YamlMember(typeof(int), Alias = "maxRows")]
             public int MaxRows { get; set; }
 
+            [YamlMember(typeof(int), Alias = "alertRows")]
             public int AlertRows { get; set; }
             
+            [YamlMember(Alias = "connections")]
             public Dictionary<string, DbSetting> Connections { get; set; }
         }
 
@@ -54,6 +62,7 @@ namespace CloudSync.Utils
         {
             _serialBuilder = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
             _deserialBuilder = new DeserializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+            Config = new Settings();
 
             Load();
         }
@@ -66,6 +75,8 @@ namespace CloudSync.Utils
         public void Load()
         {
             Config = _deserialBuilder.Deserialize<Settings>(File.ReadAllText("config.yaml"));
+            if (Config.Connections == null)
+                Config.Connections = new Dictionary<string, DbSetting>();
         }
     }
 }

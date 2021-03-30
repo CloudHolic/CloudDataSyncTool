@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using System.Windows.Input;
+﻿using CloudSync.ViewModels;
 using MahApps.Metro.Controls;
 
 namespace CloudSync.Contents
@@ -12,12 +11,7 @@ namespace CloudSync.Contents
         public DbSelectWindow()
         {
             InitializeComponent();
-        }
-
-        private void PortTextBox_OnPreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            var regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
+            DataContext = new DbSelectWindowViewModel();
         }
     }
 }

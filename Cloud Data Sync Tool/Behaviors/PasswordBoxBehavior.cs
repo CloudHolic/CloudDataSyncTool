@@ -26,7 +26,7 @@ namespace CloudSync.Behaviors
             var box = ((PasswordBoxBehavior) s).AssociatedObject;
             if (box == null)
                 return;
-            if (((SecureString) e.NewValue).Length == 0)
+            if (e.NewValue == null || ((SecureString) e.NewValue).Length == 0)
                 box.Password = string.Empty;
         }
 

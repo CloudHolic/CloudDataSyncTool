@@ -6,13 +6,9 @@
                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                    xmlns:cb="clr-namespace:CloudSync.Behaviors"
                    xmlns:ctrls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                   xmlns:viewModels="clr-namespace:CloudSync.ViewModels"
                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                    mc:Ignorable="d"
                    Title="Databases" Height="500" Width="740" TitleCharacterCasing="Normal">
-    <ctrls:MetroWindow.DataContext>
-        <viewModels:DbSelectWindowViewModel/>
-    </ctrls:MetroWindow.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
@@ -22,14 +18,8 @@
             <RowDefinition Height="5*"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <ListView Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="1" Margin="10"
-                 ItemsSource="{Binding Databases}" SelectedIndex="{Binding CurIdx}">
-            <ListView.Resources>
-                <Style TargetType="GridViewColumnHeader">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                </Style>
-            </ListView.Resources>
-        </ListView>
+        <ListBox Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="1" Margin="10"
+                 ItemsSource="{Binding Databases, Mode=TwoWay}" DisplayMemberPath="Name" SelectedItem="{Binding CurItem, Mode=TwoWay}"/>
         <StackPanel Grid.Column="0" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Button Content="New" Margin="10" FontSize="20" BorderThickness="1" Width="80" Command="{Binding NewCommand}"/>
             <Button Content="Delete" Margin="10" FontSize="20" BorderThickness="1" Width="80" Command="{Binding DeleteCommand}"/>
@@ -49,7 +39,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="Host:"/>
                 <TextBox Name="SrcHost" Grid.Column="1" Margin="20,10" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
-                         Text="{Binding Conn.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding CurItem.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
             <Grid Grid.Row="1" Margin="5">
                 <Grid.ColumnDefinitions>
@@ -60,7 +50,7 @@
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="Port:"/>
                 <xctk:IntegerUpDown Grid.Column="1" Name="SrcPort" Margin="20,10" Padding="0,0,5,0" FontSize="20"
                                     HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                                    Text="{Binding Conn.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                    Text="{Binding CurItem.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
             <Grid Grid.Row="2" Margin="5">
                 <Grid.ColumnDefinitions>
@@ -69,7 +59,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="User Id:"/>
                 <TextBox Name="SrcId" Grid.Column="1" Margin="20,10" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding Conn.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding CurItem.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
             <Grid Grid.Row="3" Margin="5">
                 <Grid.ColumnDefinitions>
@@ -79,7 +69,7 @@
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="Password:"/>
                 <PasswordBox Name="SrcPw" Grid.Column="1" Margin="20,10" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
                     <i:Interaction.Behaviors>
-                        <cb:PasswordBoxBehavior BoundPassword="{Binding Conn.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <cb:PasswordBoxBehavior BoundPassword="{Binding CurItem.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </i:Interaction.Behaviors>
                 </PasswordBox>
             </Grid>
@@ -90,7 +80,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="Name:"/>
                 <TextBox Name="SrcDb"  Grid.Column="1" Margin="20,10" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding Conn.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding CurItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </Grid>
         </Grid>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
