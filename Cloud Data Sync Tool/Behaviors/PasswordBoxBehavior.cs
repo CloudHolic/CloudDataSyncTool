@@ -2,6 +2,7 @@
 using System.Security;
 using System.Windows;
 using System.Windows.Controls;
+using CloudSync.Utils;
 
 namespace CloudSync.Behaviors
 {
@@ -24,10 +25,15 @@ namespace CloudSync.Behaviors
         public static void OnBoundPasswordChanged(object s, DependencyPropertyChangedEventArgs e)
         {
             var box = ((PasswordBoxBehavior) s).AssociatedObject;
+            var securePassword = (SecureString) e.NewValue;
             if (box == null)
                 return;
-            if (e.NewValue == null || ((SecureString) e.NewValue).Length == 0)
+            if (securePassword == null || securePassword.Length == 0)
                 box.Password = string.Empty;
+            if (box.Password == SecureStringUtils.ConvertToString(securePassword))
+                return;
+
+            box.Password = SecureStringUtils.ConvertToString(securePassword);
         }
 
         protected override void OnAttached()

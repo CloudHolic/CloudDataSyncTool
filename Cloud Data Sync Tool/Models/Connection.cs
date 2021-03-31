@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Security;
+using CloudSync.Utils;
 
 namespace CloudSync.Models
 {
@@ -86,7 +86,7 @@ namespace CloudSync.Models
             Host = host;
             Port = port;
             Id = id;
-            Password = ConvertToSecureString(password);
+            Password = SecureStringUtils.ConvertToSecureString(password);
             Name = database;
         }
 
@@ -107,37 +107,11 @@ namespace CloudSync.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         #endregion
-
-        private SecureString ConvertToSecureString(string password = "")
-        {
-            if (string.IsNullOrEmpty(password))
-                return new SecureString();
-
-            var secure = new SecureString();
-
-            foreach (var c in password)
-                secure.AppendChar(c);
-
-            secure.MakeReadOnly();
-            return secure;
-        }
-
-        public string GetPassword()
-        {
-            if (Password == null)
-                return "";
-
-            var pStr = Marshal.SecureStringToCoTaskMemUnicode(Password);
-            var unsecuredPassword = Marshal.PtrToStringUni(pStr);
-            Marshal.ZeroFreeCoTaskMemUnicode(pStr);
-
-            return unsecuredPassword;
-        }
-
+        
         public static Tuple<string, DbSetting> ConvertToDbSetting(Connection connection)
         {
             return new Tuple<string, DbSetting>(connection.Name,
-                new DbSetting(connection.Host, connection.Port, connection.Id, connection.GetPassword()));
+                new DbSetting(connection.Host, connection.Port, connection.Id, SecureStringUtils.ConvertToString(connection.Password)));
         }
     }
 }

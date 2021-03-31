@@ -22,7 +22,7 @@ namespace CloudSync.Utils
         private static string MakeConnectionString(Connection conString)
         {
             // SslMode=VerifyCA;
-            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={conString.GetPassword()};"
+            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={SecureStringUtils.ConvertToString(conString.Password)};"
                    + "AllowLoadLocalInfile=true;Allow User Variables=true;";
         }
 

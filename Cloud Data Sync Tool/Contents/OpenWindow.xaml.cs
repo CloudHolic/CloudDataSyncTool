@@ -12,7 +12,7 @@ namespace CloudSync.Contents
     /// </summary>
     public partial class OpenWindow : MetroWindow
     {
-        private Binding _prevHostBinding, _prevPortBinding, _prevIdBinding;
+        private Binding _prevHostBinding, _prevPortBinding, _prevIdBinding;//, _prevPwBinding;
 
         public OpenWindow()
         {
@@ -30,13 +30,13 @@ namespace CloudSync.Contents
             _prevHostBinding = DstHost.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
             _prevPortBinding = DstPort.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
             _prevIdBinding = DstId.GetBindingExpression(TextBox.TextProperty)?.ParentBinding;
+            //_prevPwBinding = BindingOperations.GetBinding(Interaction.GetBehaviors(DstPw)[0], PasswordBoxBehavior.BoundPasswordProperty);
 
             DstHost.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcHost});
             DstPort.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcPort});
             DstId.SetBinding(TextBox.TextProperty, new Binding("Text") {Source = SrcId});
-
-            // TODO: 1. Save previous binding of DstPw to _prevPwBinding.
-            // TODO: 2. Change binding BoundPasswordProperty of DstPw to that of SrcPw. (Interaction.GetBehaviors(DstPw)[0])
+            //BindingOperations.SetBinding(Interaction.GetBehaviors(DstPw)[0], PasswordBoxBehavior.BoundPasswordProperty,
+            //    new Binding("BoundPassword") {Source = ((PasswordBoxBehavior) Interaction.GetBehaviors(SrcPw)[0]).BoundPassword});
         }
 
         private void ConnectionCheckbox_OnUnchecked(object sender, RoutedEventArgs e)
@@ -49,8 +49,9 @@ namespace CloudSync.Contents
 
             if(_prevIdBinding != null)
                 DstId.SetBinding(TextBox.TextProperty, _prevIdBinding);
-            
-            // TODO: Change binding BoundPasswordProperty of DstPw to _prevPwBinding.
+
+            //if (_prevPwBinding != null)
+            //    BindingOperations.SetBinding(Interaction.GetBehaviors(DstPw)[0], PasswordBoxBehavior.BoundPasswordProperty, _prevPwBinding);
         }
     }
 }

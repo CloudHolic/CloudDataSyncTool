@@ -161,6 +161,7 @@
     <Compile Include="Utils\DbUtils.cs" />
     <Compile Include="Utils\ICustomDialogManager.cs" />
     <Compile Include="Utils\MathExtensions.cs" />
+    <Compile Include="Utils\SecureStringUtils.cs" />
     <Compile Include="ViewModels\DbSelectWindowViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModelBase.cs" />
     <Compile Include="ViewModels\IDialogViewModelBase.cs" />
