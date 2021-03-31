@@ -13,7 +13,7 @@ namespace CloudSync.Contents
     /// </summary>
     public partial class OpenWindow : MetroWindow
     {
-        private Binding _prevHostBinding, _prevPortBinding, _prevIdBinding;//, _prevPwBinding;
+        private Binding _prevHostBinding, _prevPortBinding, _prevIdBinding; //, _prevPwBinding;
 
         public OpenWindow()
         {

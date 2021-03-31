@@ -23,7 +23,6 @@ namespace CloudSync.ViewModels
             set { Set(() => CurItem, value); }
         }
         
-
         public DbSelectWindowViewModel()
         {
             Databases = new ObservableCollection<Connection>();
@@ -63,7 +62,6 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => TestCommand, new RelayCommand(() =>
                 {
-
                 }));
             }
         }
