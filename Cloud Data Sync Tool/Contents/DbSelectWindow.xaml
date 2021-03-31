@@ -7,8 +7,8 @@
                    xmlns:cb="clr-namespace:CloudSync.Behaviors"
                    xmlns:ctrls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-                   mc:Ignorable="d"
-                   Title="Databases" Height="500" Width="740" TitleCharacterCasing="Normal">
+                   mc:Ignorable="d" Height="500" Width="740"
+                   Title="Databases" ResizeMode="NoResize" TitleCharacterCasing="Normal" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>

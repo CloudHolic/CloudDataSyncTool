@@ -11,7 +11,7 @@ namespace CloudSync.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var flag = value is bool b && b;
-            return flag ? Visibility.Visible : (System.Convert.ToString(parameter) == "Hidden" ? Visibility.Hidden : Visibility.Collapsed);
+            return flag ? Visibility.Visible : System.Convert.ToString(parameter) == "Hidden" ? Visibility.Hidden : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Controls;
+using CloudSync.ViewModels;
 using MahApps.Metro.Controls;
 
 namespace CloudSync.Contents
@@ -17,6 +18,7 @@ namespace CloudSync.Contents
         public OpenWindow()
         {
             InitializeComponent();
+            DataContext = new OpenWindowViewModel();
         }
 
         private void PortTextBox_OnPreviewTextInput(object sender, TextCompositionEventArgs e)

@@ -145,6 +145,8 @@
     </Compile>
     <Compile Include="Converters\BooleanToButtonContentConverter.cs" />
     <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\MultiBooleanToIsEnabledConverter.cs" />
+    <Compile Include="Converters\MultiBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\MultiParameterToVisualBrushConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
     <Compile Include="Events\EventBus.cs" />

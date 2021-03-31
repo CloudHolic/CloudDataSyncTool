@@ -6,20 +6,30 @@
                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                    xmlns:cb="clr-namespace:CloudSync.Behaviors"
                    xmlns:ctrls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-                   xmlns:viewModels="clr-namespace:CloudSync.ViewModels"
                    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
                    mc:Ignorable="d" Width="710" Height="605"
                    Title="Login" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" TitleCharacterCasing="Normal">
-    <ctrls:MetroWindow.DataContext>
-        <viewModels:OpenWindowViewModel/>
-    </ctrls:MetroWindow.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <GroupBox Grid.Row="0" Margin="10" Header="Source Database Connection" ctrls:ControlsHelper.ContentCharacterCasing="Normal">
+        <GroupBox Grid.Row="0" Margin="10" ctrls:ControlsHelper.ContentCharacterCasing="Normal">
+            <GroupBox.Header>
+                <DockPanel Height="20" VerticalAlignment="Center">
+                    <TextBlock Text="Source Database Connection" DockPanel.Dock="Left" Foreground="White" VerticalAlignment="Center"/>
+                    <ComboBox DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Width="70"
+                              FontSize="10" BorderThickness="0" Margin="0,0,30,0"
+                              ItemsSource="{Binding Databases}" DisplayMemberPath="Name" SelectedItem="{Binding SrcPreset}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding SrcSelChangedCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </ComboBox>
+                </DockPanel>
+            </GroupBox.Header>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -35,11 +45,11 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Host:"/>
                     <TextBox Name="SrcHost" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
-                             Text="{Binding SrcCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding SrcCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsSrcCustom}"/>
                     <DockPanel Grid.Column="2">
                         <TextBlock DockPanel.Dock="Left" FontSize="20" VerticalAlignment="Center" Text="Port:"/>
                         <xctk:IntegerUpDown Name="SrcPort" Margin="10,0,0,0" Padding="0,0,5,0" FontSize="20"
-                                            HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                                            HorizontalAlignment="Stretch" VerticalContentAlignment="Center" IsEnabled="{Binding IsSrcCustom}"
                                             Text="{Binding SrcCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </DockPanel>
                 </Grid>
@@ -51,7 +61,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="User Id:"/>
                     <TextBox Name="SrcId" Grid.Column="1" Margin="20,0,20,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                             Text="{Binding SrcCon.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding SrcCon.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsSrcCustom}"/>
                 </Grid>
                 <Grid Grid.Row="2" Margin="5">
                     <Grid.ColumnDefinitions>
@@ -60,7 +70,8 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Password:"/>
-                    <PasswordBox Name="SrcPw" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
+                    <PasswordBox Name="SrcPw" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
+                                 IsEnabled="{Binding IsSrcCustom}">
                         <i:Interaction.Behaviors>
                             <cb:PasswordBoxBehavior BoundPassword="{Binding SrcCon.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </i:Interaction.Behaviors>
@@ -73,18 +84,33 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Name:"/>
                     <TextBox Name="SrcDb"  Grid.Column="1" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                             Text="{Binding SrcCon.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding SrcCon.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsSrcCustom}"/>
                 </Grid>
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="1" Margin="10">
             <GroupBox.Header>
-                <DockPanel>
-                    <TextBlock Text="Destination Database Connection" DockPanel.Dock="Left" Foreground="White"/>
-                    <CheckBox Content="Same as source connection." DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,30,0"
+                <DockPanel Height="20">
+                    <TextBlock Text="Destination Database Connection" DockPanel.Dock="Left" Foreground="White" VerticalAlignment="Center"/>
+                    <ComboBox DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Width="70"
+                              FontSize="10" BorderThickness="0" Margin="0,0,30,0"
+                              ItemsSource="{Binding Databases}" DisplayMemberPath="Name" SelectedItem="{Binding DstPreset}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="SelectionChanged">
+                                <i:InvokeCommandAction Command="{Binding DstSelChangedCommand}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </ComboBox>
+                    <CheckBox Content="Same as source connection." DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,30,0"
                               ctrls:CheckBoxHelper.CheckSize="15" ctrls:CheckBoxHelper.ForegroundUnchecked="White" ctrls:CheckBoxHelper.ForegroundChecked="White"
-                              IsChecked="{Binding SyncedWithSrc}"
-                              Checked="ConnectionCheckbox_OnChecked" Unchecked="ConnectionCheckbox_OnUnchecked"/>
+                              IsChecked="{Binding IsSyncedWithSrc}" Checked="ConnectionCheckbox_OnChecked" Unchecked="ConnectionCheckbox_OnUnchecked">
+                        <CheckBox.Visibility>
+                            <MultiBinding Converter="{StaticResource MultiBooleanToVisibilityConverter}">
+                                <Binding Path="IsSrcCustom"/>
+                                <Binding Path="IsDstCustom"/>
+                            </MultiBinding>
+                        </CheckBox.Visibility>
+                    </CheckBox>
                 </DockPanel>
             </GroupBox.Header>
             <Grid>
@@ -102,14 +128,26 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Host:"/>
                     <TextBox Name="DstHost" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
-                             Text="{Binding DstCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"/>
+                             Text="{Binding DstCon.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.IsEnabled>
+                            <MultiBinding Converter="{StaticResource MultiBooleanToIsEnabledConverter}">
+                                <Binding Path="IsDstCustom"/>
+                                <Binding Path="IsSyncedWithSrc"/>
+                            </MultiBinding>
+                        </TextBox.IsEnabled>
+                    </TextBox>
                     <DockPanel Grid.Column="2">
                         <TextBlock DockPanel.Dock="Left" FontSize="20" VerticalAlignment="Center" Text="Port:"/>
-                        <TextBox Name="DstPort" Margin="10,0,0,0" HorizontalAlignment="Stretch" FontSize="20" VerticalContentAlignment="Center"
-                                 Text="{Binding DstCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"
-                                 PreviewTextInput="PortTextBox_OnPreviewTextInput"/>
+                        <xctk:IntegerUpDown Name="DstPort" Margin="10,0,0,0" Padding="0,0,5,0" FontSize="20"
+                                            HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
+                                            Text="{Binding DstCon.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <xctk:IntegerUpDown.IsEnabled>
+                                <MultiBinding Converter="{StaticResource MultiBooleanToIsEnabledConverter}">
+                                    <Binding Path="IsDstCustom"/>
+                                    <Binding Path="IsSyncedWithSrc"/>
+                                </MultiBinding>
+                            </xctk:IntegerUpDown.IsEnabled>
+                        </xctk:IntegerUpDown>
                     </DockPanel>
                 </Grid>
                 <Grid Grid.Row="1" Margin="5">
@@ -120,8 +158,14 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="User Id:"/>
                     <TextBox Name="DstId"  Grid.Column="1" Margin="20,0,20,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                             Text="{Binding DstCon.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}"/>
+                             Text="{Binding DstCon.Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.IsEnabled>
+                            <MultiBinding Converter="{StaticResource MultiBooleanToIsEnabledConverter}">
+                                <Binding Path="IsDstCustom"/>
+                                <Binding Path="IsSyncedWithSrc"/>
+                            </MultiBinding>
+                        </TextBox.IsEnabled>
+                    </TextBox>
                 </Grid>
                 <Grid Grid.Row="2" Margin="5">
                     <Grid.ColumnDefinitions>
@@ -130,11 +174,16 @@
                         <ColumnDefinition Width="2*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Password:"/>
-                    <PasswordBox Name="DstPw" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"
-                                 IsEnabled="{Binding SyncedWithSrc, Converter={StaticResource NotConverter}}">
+                    <PasswordBox Name="DstPw" Grid.Column="1" Margin="20,0,20,0" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
                         <i:Interaction.Behaviors>
                             <cb:PasswordBoxBehavior BoundPassword="{Binding DstCon.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </i:Interaction.Behaviors>
+                        <PasswordBox.IsEnabled>
+                            <MultiBinding Converter="{StaticResource MultiBooleanToIsEnabledConverter}">
+                                <Binding Path="IsDstCustom"/>
+                                <Binding Path="IsSyncedWithSrc"/>
+                            </MultiBinding>
+                        </PasswordBox.IsEnabled>
                     </PasswordBox>
                 </Grid>
                 <Grid Grid.Row="3" Margin="5">
@@ -144,7 +193,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Margin="0,0,-10,0" FontSize="20" VerticalAlignment="Center" Text="Name:"/>
                     <TextBox Name="DstDb" Grid.Column="1" Margin="20,0,0,0" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                             Text="{Binding DstCon.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                             Text="{Binding DstCon.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsDstCustom}"/>
                 </Grid>
             </Grid>
         </GroupBox>

@@ -3,6 +3,8 @@
                     xmlns:cvt="clr-namespace:CloudSync.Converters">
     <cvt:BooleanToButtonContentConverter x:Key="BooleanToButtonContentConverter"/>
     <cvt:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <cvt:MultiBooleanToIsEnabledConverter x:Key="MultiBooleanToIsEnabledConverter"/>
+    <cvt:MultiBooleanToVisibilityConverter x:Key="MultiBooleanToVisibilityConverter"/>
     <cvt:MultiParameterToVisualBrushConverter x:Key="MultiParameterToVisualBrushConverter"/>
     <cvt:NotConverter x:Key="NotConverter"/>
 </ResourceDictionary>

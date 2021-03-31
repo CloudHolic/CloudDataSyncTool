@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 using CloudSync.Commands;
 using CloudSync.Contents;
 using CloudSync.Models;
+using CloudSync.Utils;
 using MahApps.Metro.Controls;
 
 namespace CloudSync.ViewModels
@@ -21,16 +24,89 @@ namespace CloudSync.ViewModels
             set { Set(() => DstCon, value); }
         }
 
-        public bool SyncedWithSrc
+        public bool IsSrcCustom
         {
-            get { return Get(() => SyncedWithSrc); }
-            set { Set(() => SyncedWithSrc, value); }
+            get { return Get(() => IsSrcCustom); }
+            set { Set(() => IsSrcCustom, value); }
+        }
+
+        public bool IsDstCustom
+        {
+            get { return Get(() => IsDstCustom); }
+            set { Set(() => IsDstCustom, value); }
+        }
+
+        public bool IsSyncedWithSrc
+        {
+            get { return Get(() => IsSyncedWithSrc); }
+            set { Set(() => IsSyncedWithSrc, value); }
+        }
+
+        public Connection SrcPreset
+        {
+            get { return Get(() => SrcPreset); }
+            set { Set(() => SrcPreset, value); }
+        }
+
+        public Connection DstPreset
+        {
+            get { return Get(() => DstPreset); }
+            set { Set(() => DstPreset, value); }
+        }
+
+        public ObservableCollection<Connection> Databases
+        {
+            get { return Get(() => Databases); }
+            set { Set(() => Databases, value); }
         }
 
         public OpenWindowViewModel()
         {
-            SrcCon = new Connection();
-            DstCon = new Connection();
+            Databases = new ObservableCollection<Connection>();
+
+            foreach (var item in ConfigManager.Instance.Config.Connections)
+                Databases.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
+
+            Databases.Add(new Connection("", "", "",3306, "Custom"));
+
+            SrcPreset = DstPreset = Databases.LastOrDefault();
+            IsSrcCustom = IsDstCustom = true;
+            IsSyncedWithSrc = false;
+
+            SrcCon = new Connection(SrcPreset) {Name = ""};
+            DstCon = new Connection(DstPreset) {Name = ""};
+        }
+
+        public ICommand SrcSelChangedCommand
+        {
+            get
+            {
+                return Get(() => SrcSelChangedCommand, new RelayCommand(() =>
+                {
+                    SrcCon = new Connection(SrcPreset);
+                    IsSrcCustom = SrcPreset.Name == "Custom";
+                    if (IsSrcCustom)
+                        SrcCon.Name = "";
+                    if (!(IsSrcCustom && IsDstCustom))
+                        IsSyncedWithSrc = false;
+                }));
+            }
+        }
+
+        public ICommand DstSelChangedCommand
+        {
+            get
+            {
+                return Get(() => DstSelChangedCommand, new RelayCommand(() =>
+                {
+                    DstCon = new Connection(DstPreset);
+                    IsDstCustom = DstPreset.Name == "Custom";
+                    if (IsDstCustom)
+                        DstCon.Name = "";
+                    if (!(IsSrcCustom && IsDstCustom))
+                        IsSyncedWithSrc = false;
+                }));
+            }
         }
 
         public ICommand SettingCommand
@@ -56,7 +132,7 @@ namespace CloudSync.ViewModels
                     if (SrcCon.Port == 0)
                         SrcCon.Port = 3306;
 
-                    if (SyncedWithSrc)
+                    if (IsSyncedWithSrc)
                     {
                         var temp = DstCon.Name;
                         DstCon = new Connection(SrcCon) {Name = temp};
