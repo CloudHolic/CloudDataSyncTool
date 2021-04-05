@@ -62,19 +62,7 @@ namespace CloudSync.ViewModels
 
         public OpenWindowViewModel()
         {
-            Databases = new ObservableCollection<Connection>();
-
-            foreach (var item in ConfigManager.Instance.Config.Connections)
-                Databases.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
-
-            Databases.Add(new Connection("", "", "",3306, "Custom"));
-
-            SrcPreset = DstPreset = Databases.LastOrDefault();
-            IsSrcCustom = IsDstCustom = true;
-            IsSyncedWithSrc = false;
-
-            SrcCon = new Connection(SrcPreset) {Name = ""};
-            DstCon = new Connection(DstPreset) {Name = ""};
+            LoadSettings();
         }
 
         public ICommand SrcSelChangedCommand
@@ -117,6 +105,7 @@ namespace CloudSync.ViewModels
                 {
                     var openWindow = new DbSelectWindow();
                     openWindow.ShowDialog();
+                    LoadSettings();
                 }));
             }
         }
@@ -158,6 +147,24 @@ namespace CloudSync.ViewModels
                     window.Close();
                 }));
             }
+        }
+
+        private void LoadSettings()
+        {
+            Databases = new ObservableCollection<Connection>();
+            
+            ConfigManager.Instance.Load();
+            foreach (var item in ConfigManager.Instance.Config.Connections)
+                Databases.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
+
+            Databases.Add(new Connection("", "", "", 3306, "Custom"));
+
+            SrcPreset = DstPreset = Databases.LastOrDefault();
+            IsSrcCustom = IsDstCustom = true;
+            IsSyncedWithSrc = false;
+
+            SrcCon = new Connection(SrcPreset) { Name = "" };
+            DstCon = new Connection(DstPreset) { Name = "" };
         }
     }
 }

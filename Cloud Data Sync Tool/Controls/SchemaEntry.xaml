@@ -52,7 +52,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <ListBox Grid.Row="1" SelectionMode="Extended" x:Name="TableList" BorderThickness="0" ItemsSource="{Binding Tables}" ItemStringFormat="&#x09;{0}"
+        <ListBox Grid.Row="1" SelectionMode="Extended" x:Name="TableList" BorderThickness="0" ItemsSource="{Binding TablesViewSource.View}" ItemStringFormat="&#x09;{0}"
                  Visibility="{Binding IsOpened, Converter={StaticResource BooleanToVisibilityConverter}}">
         </ListBox>
     </Grid>

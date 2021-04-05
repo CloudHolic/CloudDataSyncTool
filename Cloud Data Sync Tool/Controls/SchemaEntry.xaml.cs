@@ -10,11 +10,11 @@ namespace CloudSync.Controls
     /// </summary>
     public partial class SchemaEntry : UserControl
     {
-        public SchemaEntry(TableList tables, bool isSelectable = true)
+        public SchemaEntry(TableList tables, bool isSrc, bool isSelectable = true)
         {
             InitializeComponent();
             TableList.IsHitTestVisible = isSelectable;
-            DataContext = new SchemaEntryViewModel(tables);
+            DataContext = new SchemaEntryViewModel(tables, isSrc);
         }
     }
 }

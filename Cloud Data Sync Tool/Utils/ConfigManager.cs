@@ -31,6 +31,17 @@ namespace CloudSync.Utils
             
             [YamlMember(Alias = "connections")]
             public Dictionary<string, DbSetting> Connections { get; set; }
+
+            public Settings()
+            {
+                MainWidth = 800;
+                MainHeight = 500;
+                MainX = 0;
+                MainY = 0;
+                MaxRows = 1000000;
+                AlertRows = 1000000;
+                Connections = new Dictionary<string, DbSetting>();
+            }
         }
 
         private readonly ISerializer _serialBuilder;
@@ -63,6 +74,9 @@ namespace CloudSync.Utils
             _serialBuilder = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
             _deserialBuilder = new DeserializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
             Config = new Settings();
+
+            if (!File.Exists("config.yaml"))
+                Save();
 
             Load();
         }

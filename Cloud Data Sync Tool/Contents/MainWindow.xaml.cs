@@ -5,7 +5,7 @@ using CloudSync.Models;
 using CloudSync.ViewModels;
 using MahApps.Metro.Controls;
 
-namespace CloudSync
+namespace CloudSync.Contents
 {
     /// <summary>
     /// MainWindow.xaml에 대한 상호 작용 논리

@@ -8,6 +8,7 @@ using System.Windows.Input;
 using CloudSync.Commands;
 using CloudSync.Contents;
 using CloudSync.Controls;
+using CloudSync.Events;
 using CloudSync.Models;
 using CloudSync.Utils;
 using MahApps.Metro.Controls;
@@ -76,6 +77,12 @@ namespace CloudSync.ViewModels
             set { Set(() => ProgressStatus, value); }
         }
 
+        public string SearchText
+        {
+            get { return Get(() => SearchText); }
+            set { Set(() => SearchText, value); }
+        }
+
         public MainWindowViewModel(Tuple<Connection, Connection> cons, Tuple<StackPanel, StackPanel> panels)
         {
             (_srcConnection, _dstConnection) = cons;
@@ -95,6 +102,21 @@ namespace CloudSync.ViewModels
             BulkCopyWorker.Instance.InitWorker(CopyCompleted, ProgressChanged);
 
             LoadTables();
+        }
+
+        public ICommand SrcSearchTextChangedCommand
+        {
+            get
+            {
+                return Get(() => SrcSearchTextChangedCommand, new RelayCommand(() =>
+                {
+                    EventBus.Instance.Publish(new SearchTextChangedEvent
+                    {
+                        IsSrc = true,
+                        SearchText = SearchText
+                    });
+                }));
+            }
         }
 
         public ICommand SrcDoubleClickCommand
@@ -249,7 +271,7 @@ namespace CloudSync.ViewModels
                 var srcList = new TableList {SchemaName = schema};
                 foreach(var table in dbUtil.FindTables(schema))
                     srcList.Tables.Add(table);
-                _srcPanel.Children.Add(new SchemaEntry(srcList));
+                _srcPanel.Children.Add(new SchemaEntry(srcList, true));
             }
 
             foreach (var schema in dstSchemas.Where(schema => !_systemSchemas.Contains(schema)))
@@ -257,7 +279,7 @@ namespace CloudSync.ViewModels
                 var dstList = new TableList {SchemaName = schema};
                 foreach (var table in dbUtil.FindTables(schema, false))
                     dstList.Tables.Add(table);
-                _dstPanel.Children.Add(new SchemaEntry(dstList, false));
+                _dstPanel.Children.Add(new SchemaEntry(dstList, false, false));
             }
         }
     }

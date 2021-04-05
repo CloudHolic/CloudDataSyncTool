@@ -152,6 +152,7 @@
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\IEvent.cs" />
     <Compile Include="Events\IEventBus.cs" />
+    <Compile Include="Events\SearchTextChangedEvent.cs" />
     <Compile Include="Models\ColumnType.cs" />
     <Compile Include="Models\Connection.cs" />
     <Compile Include="Models\DbSetting.cs" />
@@ -188,7 +189,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Contents\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -198,7 +199,7 @@
     </Compile>
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Commands\RelayCommandBase.cs" />
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Contents\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

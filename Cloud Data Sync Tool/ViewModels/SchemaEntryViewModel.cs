@@ -1,9 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using CloudSync.Behaviors;
 using CloudSync.Commands;
 using CloudSync.Controls;
+using CloudSync.Events;
 using CloudSync.Models;
 using MahApps.Metro.Controls;
 using Microsoft.Xaml.Behaviors;
@@ -11,7 +14,7 @@ using Xceed.Wpf.AvalonDock.Controls;
 
 namespace CloudSync.ViewModels
 {
-    public class SchemaEntryViewModel : ViewModelBase
+    public class SchemaEntryViewModel : ViewModelBase, IEvent<SearchTextChangedEvent>
     {
         public bool IsChecked
         {
@@ -37,11 +40,23 @@ namespace CloudSync.ViewModels
             set { Set(() => Tables, value); }
         }
 
-        public SchemaEntryViewModel(TableList tables)
+        public CollectionViewSource TablesViewSource
+        {
+            get { return Get(() => TablesViewSource); }
+            set { Set(() => TablesViewSource, value); }
+        }
+
+        private readonly bool _isSrc;
+
+        public SchemaEntryViewModel(TableList tables, bool isSrc)
         {
             IsOpened = false;
+            _isSrc = isSrc;
             SchemaName = tables.SchemaName;
             Tables = new ObservableCollection<string>(tables.Tables);
+            TablesViewSource = new CollectionViewSource {Source = Tables};
+
+            EventBus.Instance.RegisterHandler(this);
         }
 
         public ICommand DoubleClickCommand
@@ -81,6 +96,17 @@ namespace CloudSync.ViewModels
                     }
                 }));
             }
+        }
+
+        public void HandleEvent(SearchTextChangedEvent e)
+        {
+            if (_isSrc != e.IsSrc)
+                return;
+
+            if (string.IsNullOrWhiteSpace(e.SearchText))
+                TablesViewSource.View.Filter = null;
+            else
+                TablesViewSource.View.Filter = de => de.ToString().Contains(e.SearchText);
         }
     }
 }
