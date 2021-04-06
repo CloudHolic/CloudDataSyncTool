@@ -7,4 +7,5 @@
     <cvt:MultiBooleanToVisibilityConverter x:Key="MultiBooleanToVisibilityConverter"/>
     <cvt:MultiParameterToVisualBrushConverter x:Key="MultiParameterToVisualBrushConverter"/>
     <cvt:NotConverter x:Key="NotConverter"/>
+    <cvt:ObjectToBooleanConverter x:Key="ObjectToBooleanConverter"/>
 </ResourceDictionary>

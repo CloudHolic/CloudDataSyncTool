@@ -29,6 +29,8 @@ namespace CloudSync.ViewModels
 
             foreach (var item in ConfigManager.Instance.Config.Connections)
                 Databases.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
+
+            CurItem = null;
         }
 
         public ICommand NewCommand
@@ -51,7 +53,7 @@ namespace CloudSync.ViewModels
                 {
                     var idx = Databases.IndexOf(CurItem);
                     Databases.RemoveAt(idx);
-                    CurItem = Databases[idx - 1];
+                    CurItem = idx > 0 ? Databases[idx - 1] : null;
                 },() => Databases.Count > 0 && CurItem != null));
             }
         }
@@ -62,6 +64,7 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => TestCommand, new RelayCommand(() =>
                 {
+                    // TODO: Implement TEST Command.
                 }));
             }
         }

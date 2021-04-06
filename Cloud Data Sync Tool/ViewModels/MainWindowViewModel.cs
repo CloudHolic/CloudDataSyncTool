@@ -23,6 +23,30 @@ namespace CloudSync.ViewModels
         private readonly ICustomDialogManager _dialogManager;
         private readonly string[] _systemSchemas = {"mysql", "sys", "information_schema", "performance_schema"};
 
+        public double WindowLeft
+        {
+            get { return Get(() => WindowLeft); }
+            set { Set(() => WindowLeft, value); }
+        }
+
+        public double WindowTop
+        {
+            get { return Get(() => WindowTop); }
+            set { Set(() => WindowTop, value); }
+        }
+
+        public double WindowHeight
+        {
+            get { return Get(() => WindowHeight); }
+            set { Set(() => WindowHeight, value); }
+        }
+
+        public double WindowWidth
+        {
+            get { return Get(() => WindowWidth); }
+            set { Set(() => WindowWidth, value); }
+        }
+
         public bool IsSrcOpened
         {
             get { return Get(() => IsSrcOpened); }
@@ -85,6 +109,11 @@ namespace CloudSync.ViewModels
 
         public MainWindowViewModel(Tuple<Connection, Connection> cons, Tuple<StackPanel, StackPanel> panels)
         {
+            WindowLeft = ConfigManager.Instance.Config.WindowLeft;
+            WindowTop = ConfigManager.Instance.Config.WindowTop;
+            WindowHeight = ConfigManager.Instance.Config.WindowHeight;
+            WindowWidth = ConfigManager.Instance.Config.WindowWidth;
+
             (_srcConnection, _dstConnection) = cons;
             (_srcPanel, _dstPanel) = panels;
             IsSrcOpened = IsDstOpened = false;
@@ -226,6 +255,22 @@ namespace CloudSync.ViewModels
                         ProgressStatus = "Ready";
                     }
                 }, () => !IsWorking));
+            }
+        }
+
+        public ICommand ClosingCommand
+        {
+            get
+            {
+                return Get(() => ClosingCommand, new RelayCommand<MetroWindow>(window =>
+                {
+                    ConfigManager.Instance.Config.WindowLeft = window.Left;
+                    ConfigManager.Instance.Config.WindowTop = window.Top;
+                    ConfigManager.Instance.Config.WindowHeight = window.ActualHeight;
+                    ConfigManager.Instance.Config.WindowWidth = window.ActualWidth;
+
+                    ConfigManager.Instance.Save();
+                }));
             }
         }
 

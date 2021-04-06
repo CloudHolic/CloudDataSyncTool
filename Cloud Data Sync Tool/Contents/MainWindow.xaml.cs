@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CloudSync.Models;
+using CloudSync.Utils;
 using CloudSync.ViewModels;
 using MahApps.Metro.Controls;
 
@@ -15,6 +17,15 @@ namespace CloudSync.Contents
         public MainWindow(Tuple<Connection, Connection> cons)
         {
             InitializeComponent();
+            
+            WindowStartupLocation = ConfigManager.Instance.Config.WindowLeft == 0 && ConfigManager.Instance.Config.WindowTop == 0
+                ? WindowStartupLocation.CenterScreen : WindowStartupLocation.Manual;
+            
+            Width = ConfigManager.Instance.Config.WindowWidth;
+            Height = ConfigManager.Instance.Config.WindowHeight;
+            Left = ConfigManager.Instance.Config.WindowLeft;
+            Top = ConfigManager.Instance.Config.WindowTop;
+
             DataContext = new MainWindowViewModel(cons, new Tuple<StackPanel, StackPanel>(SrcPanel, DstPanel));
         }
 

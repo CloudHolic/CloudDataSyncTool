@@ -149,6 +149,7 @@
     <Compile Include="Converters\MultiBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\MultiParameterToVisualBrushConverter.cs" />
     <Compile Include="Converters\NotConverter.cs" />
+    <Compile Include="Converters\ObjectToBooleanConverter.cs" />
     <Compile Include="Events\EventBus.cs" />
     <Compile Include="Events\IEvent.cs" />
     <Compile Include="Events\IEventBus.cs" />

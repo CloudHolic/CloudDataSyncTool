@@ -11,33 +11,33 @@ namespace CloudSync.Utils
     {
         public class Settings
         {
-            [YamlMember(typeof(int), Alias = "mainWidth")]
-            public int MainWidth { get; set; }
+            [YamlMember(typeof(double))]
+            public double WindowLeft { get; set; }
 
-            [YamlMember(typeof(int), Alias = "mainHeight")]
-            public int MainHeight { get; set; }
+            [YamlMember(typeof(double))]
+            public double WindowTop { get; set; }
 
-            [YamlMember(typeof(int), Alias = "mainX")]
-            public int MainX { get; set; }
+            [YamlMember(typeof(double))]
+            public double WindowHeight { get; set; }
 
-            [YamlMember(typeof(int), Alias = "mainY")]
-            public int MainY { get; set; }
+            [YamlMember(typeof(double))]
+            public double WindowWidth { get; set; }
 
-            [YamlMember(typeof(int), Alias = "maxRows")]
+            [YamlMember(typeof(int))]
             public int MaxRows { get; set; }
 
-            [YamlMember(typeof(int), Alias = "alertRows")]
+            [YamlMember(typeof(int))]
             public int AlertRows { get; set; }
             
-            [YamlMember(Alias = "connections")]
+            [YamlMember(typeof(Dictionary<string, DbSetting>))]
             public Dictionary<string, DbSetting> Connections { get; set; }
 
             public Settings()
             {
-                MainWidth = 800;
-                MainHeight = 500;
-                MainX = 0;
-                MainY = 0;
+                WindowLeft = 0;
+                WindowTop = 0;
+                WindowHeight = 500;
+                WindowWidth = 800;
                 MaxRows = 1000000;
                 AlertRows = 1000000;
                 Connections = new Dictionary<string, DbSetting>();

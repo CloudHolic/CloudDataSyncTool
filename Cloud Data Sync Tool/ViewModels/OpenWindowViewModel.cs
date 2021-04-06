@@ -71,6 +71,9 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => SrcSelChangedCommand, new RelayCommand(() =>
                 {
+                    if (Databases.Count == 0)
+                        return;
+
                     SrcCon = new Connection(SrcPreset);
                     IsSrcCustom = SrcPreset.Name == "Custom";
                     if (IsSrcCustom)
@@ -87,6 +90,9 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => DstSelChangedCommand, new RelayCommand(() =>
                 {
+                    if (Databases.Count == 0)
+                        return;
+
                     DstCon = new Connection(DstPreset);
                     IsDstCustom = DstPreset.Name == "Custom";
                     if (IsDstCustom)
