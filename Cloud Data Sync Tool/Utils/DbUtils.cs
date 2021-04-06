@@ -19,18 +19,23 @@ namespace CloudSync.Utils
             _destString = MakeConnectionString(destConString);
         }
 
-        private static string MakeConnectionString(Connection conString)
+        public static bool CheckConnection(Connection conn)
         {
-            // SslMode=VerifyCA;
-            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={SecureStringUtils.ConvertToString(conString.Password)};"
-                   + "AllowLoadLocalInfile=true;Allow User Variables=true;";
-        }
-
-        private static MySqlConnection ConnectionFactory(string connString)
-        {
-            var connection = new MySqlConnection(connString);
-            connection.Open();
-            return connection;
+            bool result;
+            var connString = MakeConnectionString(conn);
+            try
+            {
+                var connection = new MySqlConnection(connString);
+                connection.Open();
+                result = true;
+                connection.Close();
+            }
+            catch
+            {
+                result = false;
+            }
+            
+            return result;
         }
 
         public List<string> FindSchemas(bool isSrc = true)
@@ -138,6 +143,37 @@ namespace CloudSync.Utils
                 return copiedRows;
             }
         }
+        
+        private static string MakeConnectionString(Connection conString)
+        {
+            // SslMode=VerifyCA;
+            return $"host={conString.Host};port={conString.Port};user id={conString.Id};password={SecureStringUtils.ConvertToString(conString.Password)};"
+                   + "AllowLoadLocalInfile=true;Allow User Variables=true;";
+        }
+
+        private static MySqlConnection ConnectionFactory(string connString)
+        {
+            var connection = new MySqlConnection(connString);
+            connection.Open();
+            return connection;
+        }
+
+        private static DataTable ConvertToDataTable(IEnumerable<IDictionary<string, object>> data, IReadOnlyCollection<ColumnType> types)
+        {
+            var table = new DataTable();
+
+            foreach (var type in types)
+                table.Columns.Add(type.Name);
+            
+            foreach (var item in data)
+            {
+                var row = table.NewRow();
+                foreach (var type in types)
+                    row[type.Name] = item[type.Name];
+                table.Rows.Add(row);
+            }
+            return table;
+        }
 
         private List<ColumnType> FindColumns(string schemaName, string tableName, bool isSrc = true)
         {
@@ -157,23 +193,6 @@ namespace CloudSync.Utils
                 Type = column["COLUMN_TYPE"].ToString(),
                 Nullable = column["IS_NULLABLE"].ToString() == "YES"
             }).ToList();
-        }
-
-        private static DataTable ConvertToDataTable(IEnumerable<IDictionary<string, object>> data, IReadOnlyCollection<ColumnType> types)
-        {
-            var table = new DataTable();
-
-            foreach (var type in types)
-                table.Columns.Add(type.Name);
-            
-            foreach (var item in data)
-            {
-                var row = table.NewRow();
-                foreach (var type in types)
-                    row[type.Name] = item[type.Name];
-                table.Rows.Add(row);
-            }
-            return table;
         }
     }
 }

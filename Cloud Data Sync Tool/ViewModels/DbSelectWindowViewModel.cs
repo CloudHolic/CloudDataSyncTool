@@ -6,11 +6,14 @@ using CloudSync.Commands;
 using CloudSync.Models;
 using CloudSync.Utils;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CloudSync.ViewModels
 {
     public class DbSelectWindowViewModel : ViewModelBase
     {
+        private readonly ICustomDialogManager _dialogManager;
+
         public ObservableCollection<Connection> Databases
         {
             get { return Get(() => Databases); }
@@ -31,6 +34,12 @@ namespace CloudSync.ViewModels
                 Databases.Add(DbSetting.ConvertToConnection(item.Key, item.Value));
 
             CurItem = null;
+
+            _dialogManager = new CustomDialogManager(new MetroDialogSettings
+            {
+                AnimateHide = false,
+                AnimateShow = false
+            });
         }
 
         public ICommand NewCommand
@@ -62,10 +71,11 @@ namespace CloudSync.ViewModels
         {
             get
             {
-                return Get(() => TestCommand, new RelayCommand(() =>
+                return Get(() => TestCommand, new RelayCommand<MetroWindow>(window =>
                 {
-                    // TODO: Implement TEST Command.
-                }));
+                    var check = DbUtils.CheckConnection(CurItem);
+                    _dialogManager.ShowMessageBox("Test Result", "Test " + (check ? "passed." : "failed."), window);
+                }, window => Databases.Count > 0 && CurItem != null));
             }
         }
 

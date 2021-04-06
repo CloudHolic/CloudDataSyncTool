@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CloudSync.Utils
@@ -13,7 +14,7 @@ namespace CloudSync.Utils
 
         Task<TResult> ShowDialogAsync<TView, TResult>() where TView : CustomDialog;
 
-        Task<MessageDialogResult> ShowMessageBox(string title, string message,
+        Task<MessageDialogResult> ShowMessageBox(string title, string message, MetroWindow window = null,
             MessageDialogStyle style = MessageDialogStyle.Affirmative, MetroDialogSettings settings = null);
     }
 }

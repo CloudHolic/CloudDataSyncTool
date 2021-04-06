@@ -52,10 +52,10 @@ namespace CloudSync.Utils
             return ShowDialogAsync<TResult>(view);
         }
 
-        public Task<MessageDialogResult> ShowMessageBox(string title, string message, MessageDialogStyle style = MessageDialogStyle.Affirmative,
-            MetroDialogSettings settings = null)
+        public Task<MessageDialogResult> ShowMessageBox(string title, string message, MetroWindow window = null,
+            MessageDialogStyle style = MessageDialogStyle.Affirmative, MetroDialogSettings settings = null)
         {
-            var mainWindow = Application.Current.Windows.OfType<MetroWindow>().First();
+            var mainWindow = window ?? Application.Current.Windows.OfType<MetroWindow>().First();
             return mainWindow.ShowMessageAsync(title, message, style, settings);
         }
     }

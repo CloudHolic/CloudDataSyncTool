@@ -1,4 +1,6 @@
-﻿using CloudSync.ViewModels;
+﻿using System.Windows;
+using System.Windows.Controls;
+using CloudSync.ViewModels;
 using MahApps.Metro.Controls;
 
 namespace CloudSync.Contents
@@ -12,6 +14,12 @@ namespace CloudSync.Contents
         {
             InitializeComponent();
             DataContext = new DbSelectWindowViewModel();
+        }
+
+        private void TextBox_OnGotFocus(object sender, RoutedEventArgs e)
+        {
+            if(e.OriginalSource is TextBox textBox)
+                textBox.SelectAll();
         }
     }
 }

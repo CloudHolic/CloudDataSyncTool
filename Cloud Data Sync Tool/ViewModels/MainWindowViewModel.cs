@@ -258,7 +258,7 @@ namespace CloudSync.ViewModels
             }
         }
 
-        public ICommand ClosingCommand
+        public ICommand ClosingCommand 
         {
             get
             {

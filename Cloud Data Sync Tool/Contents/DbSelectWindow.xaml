@@ -39,7 +39,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="Host:"/>
                 <TextBox Name="SrcHost" Grid.Column="1" Margin="20,10" FontSize="20" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" 
-                         Text="{Binding CurItem.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         GotFocus="TextBox_OnGotFocus" Text="{Binding CurItem.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding CurItem, Converter={StaticResource ObjectToBooleanConverter}}"/>
             </Grid>
             <Grid Grid.Row="1" Margin="5">
@@ -84,14 +84,14 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Margin="0,10,-10,10" FontSize="20" VerticalAlignment="Center" Text="Name:"/>
                 <TextBox Name="SrcDb"  Grid.Column="1" Margin="20,10" FontSize="20" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"
-                         Text="{Binding CurItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         GotFocus="TextBox_OnGotFocus" Text="{Binding CurItem.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding CurItem, Converter={StaticResource ObjectToBooleanConverter}}"/>
             </Grid>
         </Grid>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Content="Test" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding TestCommand}"/>
-            <Button Content="Save" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding SaveCommand}"
+            <Button Content="Test" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding TestCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
+            <Button Content="Save" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding SaveCommand}"/>
             <Button Content="Close" Margin="10" FontSize="20" BorderThickness="1" Width="100" Command="{Binding CloseCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ctrls:MetroWindow}}}"/>
         </StackPanel>
