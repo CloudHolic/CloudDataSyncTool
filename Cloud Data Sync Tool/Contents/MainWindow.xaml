@@ -8,8 +8,6 @@
                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                  xmlns:cb="clr-namespace:CloudSync.Behaviors"
                  mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="800"
-                 Left="{Binding WindowLeft, Mode=OneTime}" Top="{Binding WindowTop, Mode=OneTime}"
-                 Height="{Binding WindowHeight, Mode=OneTime}" Width="{Binding WindowWidth, Mode=OneTime}"
                  Title="Cloud Data Sync Tool" TitleCharacterCasing="Normal">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">

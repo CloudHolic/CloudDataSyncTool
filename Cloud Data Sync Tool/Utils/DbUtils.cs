@@ -12,11 +12,13 @@ namespace CloudSync.Utils
     {
         private readonly string _srcString;
         private readonly string _destString;
+        private readonly int _maxRows;
 
         public DbUtils(Connection srcConString, Connection destConString)
         {
             _srcString = MakeConnectionString(srcConString);
             _destString = MakeConnectionString(destConString);
+            _maxRows = ConfigManager.Instance.Config.MaxRows;
         }
 
         public static bool CheckConnection(Connection conn)
@@ -89,7 +91,7 @@ namespace CloudSync.Utils
                     var columns = FindColumns(srcSchemaName, tableName);
 
                     //var loopCount = 20;
-                    var loopCount = count / 1000000 + 1;
+                    var loopCount = count / _maxRows + 1;
 
                     using (var dstConn = ConnectionFactory(_destString))
                     {
@@ -109,7 +111,7 @@ namespace CloudSync.Utils
                         for (var i = 0; i < loopCount; i++)
                         {
                             var record = srcConn.Query($"select * from {srcSchemaName}.{tableName} "
-                                                       + $"order by {string.Join(", ", pk)} asc limit 1000000 offset {i * 1000000}")
+                                                       + $"order by {string.Join(", ", pk)} asc limit {_maxRows} offset {i * _maxRows}")
                                 .Select(x => (IDictionary<string, object>)x).ToList();
                             var table = ConvertToDataTable(record, columns);
 
