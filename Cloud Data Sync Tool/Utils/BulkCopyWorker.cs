@@ -81,6 +81,12 @@ namespace CloudSync.Utils
                 //stopWatch.Restart();
                 worker.ReportProgress((int) Math.Ceiling(progress).Clamp(0, 100), $@"Copying table {table}.");
                 var count = dbUtil.BulkCopy(args.SrcSchemaName, args.DstSchemaName, table);
+                if (LastErrorManager.Instance.CheckError())
+                {
+                    e.Cancel = true;
+                    worker.ReportProgress((int)Math.Ceiling(progress).Clamp(0, 100), $@"Error occurred while copying table {table}.");
+                    break;
+                }
                 progress += step;
 
                 copiedTables++;

@@ -137,8 +137,14 @@
     <Compile Include="Contents\DbSelectWindow.xaml.cs">
       <DependentUpon>DbSelectWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Contents\NotifyView.xaml.cs">
+      <DependentUpon>NotifyView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Contents\OpenWindow.xaml.cs">
       <DependentUpon>OpenWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Contents\SettingView.xaml.cs">
+      <DependentUpon>SettingView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SchemaEntry.xaml.cs">
       <DependentUpon>SchemaEntry.xaml</DependentUpon>
@@ -157,6 +163,7 @@
     <Compile Include="Models\ColumnType.cs" />
     <Compile Include="Models\Connection.cs" />
     <Compile Include="Models\DbSetting.cs" />
+    <Compile Include="Models\Error.cs" />
     <Compile Include="Models\TableList.cs" />
     <Compile Include="Models\WorkerArgs.cs" />
     <Compile Include="Utils\BulkCopyWorker.cs" />
@@ -164,12 +171,14 @@
     <Compile Include="Utils\CustomDialogManager.cs" />
     <Compile Include="Utils\DbUtils.cs" />
     <Compile Include="Utils\ICustomDialogManager.cs" />
+    <Compile Include="Utils\LastErrorManager.cs" />
     <Compile Include="Utils\MathExtensions.cs" />
     <Compile Include="Utils\SecureStringUtils.cs" />
     <Compile Include="ViewModels\DbSelectWindowViewModel.cs" />
     <Compile Include="ViewModels\DialogViewModelBase.cs" />
     <Compile Include="ViewModels\IDialogViewModelBase.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\NotifyViewModel.cs" />
     <Compile Include="ViewModels\OpenWindowViewModel.cs" />
     <Compile Include="ViewModels\SchemaEntryViewModel.cs" />
     <Compile Include="ViewModels\VerifiableViewModelBase.cs" />
@@ -182,7 +191,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Contents\NotifyView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Contents\OpenWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Contents\SettingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

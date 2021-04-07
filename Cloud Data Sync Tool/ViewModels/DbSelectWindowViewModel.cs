@@ -74,7 +74,8 @@ namespace CloudSync.ViewModels
                 return Get(() => TestCommand, new RelayCommand<MetroWindow>(window =>
                 {
                     var check = DbUtils.CheckConnection(CurItem);
-                    _dialogManager.ShowMessageBox("Test Result", "Test " + (check ? "passed." : "failed."), window);
+                    _dialogManager.ShowMessageBox("Test Result",
+                        "Test " + (check ? "passed." : "failed.\n" + LastErrorManager.Instance.GetLastError()), window);
                 }, window => Databases.Count > 0 && CurItem != null));
             }
         }

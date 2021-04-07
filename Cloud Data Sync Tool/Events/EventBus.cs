@@ -30,6 +30,11 @@ namespace CloudSync.Events
         }
 
         #region Private members
+        private EventBus()
+        {
+
+        }
+
         private List<WeakReference> GetSubscribers(Type type)
         {
             List<WeakReference> subscribers;

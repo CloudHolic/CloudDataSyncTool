@@ -191,6 +191,20 @@ namespace CloudSync.ViewModels
             }
         }
 
+        public ICommand RefreshCommand
+        {
+            get
+            {
+                return Get(() => RefreshCommand, new RelayCommand(() =>
+                {
+                    LoadTables();
+
+                    ProgressValue = 0;
+                    ProgressStatus = "Ready";
+                }, () => !IsWorking));
+            }
+        }
+
         public ICommand ChangeCommand
         {
             get
@@ -247,14 +261,19 @@ namespace CloudSync.ViewModels
 
         private void CopyCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Cancelled)
-                ProgressStatus = "Cancelled. - " + ProgressStatus;
-            else if (e.Error != null)
-                ProgressStatus = "Error occurred. - " + e.Error.Message;
+            if (LastErrorManager.Instance.CheckError())
+                _dialogManager.ShowMessageBox("Copy failed", ProgressStatus + "\n" + LastErrorManager.Instance.GetLastError());
             else
-                ProgressStatus = $"Completed. - {(int) e.Result} tables copied.";
-            
-            _dialogManager.ShowMessageBox("Copy Completed", ProgressStatus);
+            {
+                if (e.Cancelled)
+                    ProgressStatus = "Cancelled. - " + ProgressStatus;
+                else if (e.Error != null)
+                    ProgressStatus = "Error occurred. - " + e.Error.Message;
+                else
+                    ProgressStatus = $"Completed. - {(int)e.Result} tables copied.";
+
+                _dialogManager.ShowMessageBox("Copy Completed", ProgressStatus);
+            }
 
             IsWorking = false;
             LoadTables();

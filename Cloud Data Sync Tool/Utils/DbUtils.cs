@@ -25,6 +25,8 @@ namespace CloudSync.Utils
         {
             bool result;
             var connString = MakeConnectionString(conn);
+            LastErrorManager.Instance.SetLastError();
+
             try
             {
                 var connection = new MySqlConnection(connString);
@@ -32,36 +34,55 @@ namespace CloudSync.Utils
                 result = true;
                 connection.Close();
             }
-            catch
+            catch(Exception e)
             {
                 result = false;
+                LastErrorManager.Instance.SetLastError(e);
             }
-            
+
             return result;
         }
 
         public List<string> FindSchemas(bool isSrc = true)
         {
             List<string> schemaList;
+            LastErrorManager.Instance.SetLastError();
 
-            using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
+            try
             {
-                schemaList = connection.Query<string>("select SCHEMA_NAME from information_schema.SCHEMATA").ToList();
-                schemaList.Sort();
+                using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
+                {
+                    schemaList = connection.Query<string>("select SCHEMA_NAME from information_schema.SCHEMATA").ToList();
+                    schemaList.Sort();
+                }
             }
-
+            catch (Exception e)
+            {
+                LastErrorManager.Instance.SetLastError(e);
+                schemaList = null;
+            }
+            
             return schemaList;
         }
 
         public List<string> FindTables(string schemaName, bool isSrc = true)
         {
             List<string> tableList;
+            LastErrorManager.Instance.SetLastError();
 
-            using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
+            try
             {
-                tableList = connection.Query<string>("select TABLE_NAME from information_schema.TABLES "
-                                                     + "where TABLE_SCHEMA = @Schema and TABLE_TYPE != 'VIEW'",
-                    new { Schema = schemaName }).ToList();
+                using (var connection = ConnectionFactory(isSrc ? _srcString : _destString))
+                {
+                    tableList = connection.Query<string>("select TABLE_NAME from information_schema.TABLES "
+                                                         + "where TABLE_SCHEMA = @Schema and TABLE_TYPE != 'VIEW'",
+                        new { Schema = schemaName }).ToList();
+                }
+            }
+            catch (Exception e)
+            {
+                LastErrorManager.Instance.SetLastError(e);
+                tableList = null;
             }
 
             return tableList;
@@ -70,6 +91,7 @@ namespace CloudSync.Utils
         public int BulkCopy(string srcSchemaName, string destSchemaName, string tableName)
         {
             var copiedRows = 0;
+            LastErrorManager.Instance.SetLastError();
 
             try
             {
@@ -82,7 +104,7 @@ namespace CloudSync.Utils
                 using (var srcConn = ConnectionFactory(_srcString))
                 {
                     //stopwatch.Restart();
-                    var count = srcConn.Query<int>($"select count(*) from {srcSchemaName}.{tableName}").First();
+                    var count = srcConn.Query<int>($"select count(*) from {srcSchemaName}.{tableName}", null, null, true, 0).First();
                     var createQuery = srcConn.Query($"show create table {srcSchemaName}.{tableName}").ToList()
                         .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
                     var pk = srcConn.Query<string>("select column_name from information_schema.COLUMNS "
@@ -141,7 +163,7 @@ namespace CloudSync.Utils
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                LastErrorManager.Instance.SetLastError(e);
                 return copiedRows;
             }
         }
