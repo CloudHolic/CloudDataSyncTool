@@ -17,9 +17,9 @@ namespace CloudSync.Utils
             _settings = settings;
         }
 
-        public async Task ShowDialogAsync(CustomDialog view)
+        public async Task ShowDialogAsync(CustomDialog view, MetroWindow window = null)
         {
-            var mainWindow = Application.Current.Windows.OfType<MetroWindow>().First();
+            var mainWindow = window ?? Application.Current.Windows.OfType<MetroWindow>().First();
 
             await mainWindow.ShowMetroDialogAsync(view, _settings);
             if (view.DataContext is DialogViewModelBase viewModel)
@@ -52,10 +52,10 @@ namespace CloudSync.Utils
             return ShowDialogAsync<TResult>(view);
         }
 
-        public Task<MessageDialogResult> ShowMessageBox(string title, string message, MetroWindow window = null,
+        public Task<MessageDialogResult> ShowMessageBox(string title, string message, 
             MessageDialogStyle style = MessageDialogStyle.Affirmative, MetroDialogSettings settings = null)
-        {
-            var mainWindow = window ?? Application.Current.Windows.OfType<MetroWindow>().First();
+        { 
+            var mainWindow = Application.Current.Windows.OfType<MetroWindow>().First();
             return mainWindow.ShowMessageAsync(title, message, style, settings);
         }
     }

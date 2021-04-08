@@ -9,10 +9,10 @@ namespace CloudSync.Contents
     /// </summary>
     public partial class NotifyView : CustomDialog
     {
-        public NotifyView(string title, Error error)
+        public NotifyView(string title, string notifyText)
         {
             InitializeComponent();
-            DataContext = new NotifyViewModel(title, error);
+            DataContext = new NotifyViewModel(title, notifyText);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using CloudSync.Commands;
+using CloudSync.Contents;
 using CloudSync.Models;
 using CloudSync.Utils;
 using MahApps.Metro.Controls;
@@ -74,8 +75,10 @@ namespace CloudSync.ViewModels
                 return Get(() => TestCommand, new RelayCommand<MetroWindow>(window =>
                 {
                     var check = DbUtils.CheckConnection(CurItem);
-                    _dialogManager.ShowMessageBox("Test Result",
-                        "Test " + (check ? "passed." : "failed.\n" + LastErrorManager.Instance.GetLastError()), window);
+                    _dialogManager.ShowDialogAsync(
+                        new NotifyView("Test Result",
+                            "Test " + (check ? "passed." : "failed.\n" + LastErrorManager.Instance.GetLastError())),
+                        window);
                 }, window => Databases.Count > 0 && CurItem != null));
             }
         }

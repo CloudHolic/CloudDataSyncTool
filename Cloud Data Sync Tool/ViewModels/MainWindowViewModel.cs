@@ -261,20 +261,31 @@ namespace CloudSync.ViewModels
 
         private void CopyCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            string title, notifyText;
+
             if (LastErrorManager.Instance.CheckError())
-                _dialogManager.ShowMessageBox("Copy failed", ProgressStatus + "\n" + LastErrorManager.Instance.GetLastError());
+            {
+                title = "Copy failed";
+                notifyText = ProgressStatus + "\n" + LastErrorManager.Instance.GetLastError();
+                ProgressStatus = "Error occurred. - " + ProgressStatus;
+            }
             else
             {
+                title = "Copy Completed";
+
                 if (e.Cancelled)
-                    ProgressStatus = "Cancelled. - " + ProgressStatus;
-                else if (e.Error != null)
-                    ProgressStatus = "Error occurred. - " + e.Error.Message;
+                {
+                    notifyText = ProgressStatus;
+                    ProgressStatus = "Cancelled. - " + notifyText;
+                }
                 else
-                    ProgressStatus = $"Completed. - {(int)e.Result} tables copied.";
-
-                _dialogManager.ShowMessageBox("Copy Completed", ProgressStatus);
+                {
+                    notifyText = $"{(int) e.Result} tables copied.";
+                    ProgressStatus = "Completed. - " + notifyText;
+                }
             }
-
+            
+            _dialogManager.ShowDialogAsync(new NotifyView(title, notifyText));
             IsWorking = false;
             LoadTables();
         }

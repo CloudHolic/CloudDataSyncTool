@@ -6,7 +6,7 @@ namespace CloudSync.Utils
 {
     public interface ICustomDialogManager
     {
-        Task ShowDialogAsync(CustomDialog view);
+        Task ShowDialogAsync(CustomDialog view, MetroWindow window = null);
 
         Task ShowDialogAsync<TView>() where TView : CustomDialog;
 
@@ -14,7 +14,7 @@ namespace CloudSync.Utils
 
         Task<TResult> ShowDialogAsync<TView, TResult>() where TView : CustomDialog;
 
-        Task<MessageDialogResult> ShowMessageBox(string title, string message, MetroWindow window = null,
+        Task<MessageDialogResult> ShowMessageBox(string title, string message,
             MessageDialogStyle style = MessageDialogStyle.Affirmative, MetroDialogSettings settings = null);
     }
 }

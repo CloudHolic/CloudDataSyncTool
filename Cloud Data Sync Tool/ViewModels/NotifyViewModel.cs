@@ -12,9 +12,16 @@ namespace CloudSync.ViewModels
             set { Set(() => Title, value); }
         }
 
-        public NotifyViewModel(string title, Error error)
+        public string NotifyText
+        {
+            get { return Get(() => NotifyText); }
+            set { Set(() => NotifyText, value); }
+        }
+
+        public NotifyViewModel(string title, string notifyText)
         {
             Title = title;
+            NotifyText = notifyText;
         }
 
         public ICommand CloseCommand
