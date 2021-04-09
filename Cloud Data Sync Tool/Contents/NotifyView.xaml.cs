@@ -1,5 +1,4 @@
-﻿using CloudSync.Models;
-using CloudSync.ViewModels;
+﻿using CloudSync.ViewModels;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CloudSync.Contents
