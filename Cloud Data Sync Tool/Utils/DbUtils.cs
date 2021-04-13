@@ -132,14 +132,21 @@ namespace CloudSync.Utils
                         
                         for (var i = 0; i < loopCount; i++)
                         {
-                            var record = srcConn.Query($"select * from {srcSchemaName}.{tableName} "
-                                                       + $"order by {string.Join(", ", pk)} asc limit {_maxRows} offset {i * _maxRows}")
-                                .Select(x => (IDictionary<string, object>)x).ToList();
-                            var table = ConvertToDataTable(record, columns);
-
-                            using (var transaction = dstConn.BeginTransaction())
+                            List<IDictionary<string, object>> record;
+                            DataTable table;
+                            using (var srcTrans = srcConn.BeginTransaction())
                             {
-                                var bulkCopy = new MySqlBulkCopy(dstConn, transaction)
+                                record = srcConn
+                                    .Query($"select * from {srcSchemaName}.{tableName} " +
+                                           $"order by {string.Join(", ", pk)} asc limit {_maxRows} offset {i * _maxRows}",
+                                        null, srcTrans, true, 0)
+                                    .Select(x => (IDictionary<string, object>) x).ToList();
+                                table = ConvertToDataTable(record, columns);
+                            }
+
+                            using (var dstTrans = dstConn.BeginTransaction())
+                            {
+                                var bulkCopy = new MySqlBulkCopy(dstConn, dstTrans)
                                 {
                                     DestinationTableName = $"{destSchemaName}.{tableName}",
                                     BulkCopyTimeout = 0
@@ -147,7 +154,7 @@ namespace CloudSync.Utils
                                 bulkCopy.WriteToServer(table);
 
                                 copiedRows += record.Count;
-                                transaction.Commit();
+                                dstTrans.Commit();
                             }
                         }
 
