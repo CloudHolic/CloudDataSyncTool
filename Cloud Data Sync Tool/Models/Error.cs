@@ -41,16 +41,12 @@
         }
 
         public override string ToString()
-        {
+        { 
             var result = string.Empty;
-            for (;;)
-            {
-                if(ErrorOccurred)
-                    result += (ErrorCode > 0 ? $"{ErrorCode} - " : string.Empty) + ErrorText + "\n";
-                if (InnerError == null)
-                    break;
+            if(ErrorOccurred)
+                result += (ErrorCode > 0 ? $"{ErrorCode} - " : string.Empty) + ErrorText + "\n";
+            if(InnerError != null)
                 result += InnerError.ToString();
-            }
             
             return result.TrimEnd('\n');
         }

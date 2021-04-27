@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using CloudSync.Models;
 using Dapper;
 using MySqlConnector;
+using Z.BulkOperations;
 
 namespace CloudSync.Utils
 {
@@ -18,7 +20,7 @@ namespace CloudSync.Utils
         {
             _srcString = MakeConnectionString(srcConString);
             _destString = MakeConnectionString(destConString);
-            _maxRows = ConfigManager.Instance.Config.MaxRows;
+            _maxRows = ConfigManager.Instance.Config.MaxRows / 10;
         }
 
         public static bool CheckConnection(Connection conn)
@@ -95,26 +97,18 @@ namespace CloudSync.Utils
 
             try
             {
-                //var stopwatch = new Stopwatch();
-
-                if (string.IsNullOrEmpty(srcSchemaName) || string.IsNullOrEmpty(destSchemaName) ||
-                    string.IsNullOrEmpty(tableName))
+                if (string.IsNullOrEmpty(srcSchemaName) || string.IsNullOrEmpty(destSchemaName) || string.IsNullOrEmpty(tableName))
                     throw new ArgumentNullException();
 
                 using (var srcConn = ConnectionFactory(_srcString))
                 {
-                    //stopwatch.Restart();
-                    var count = srcConn.Query<int>($"select count(*) from {srcSchemaName}.{tableName}", null, null, true, 0).First();
                     var createQuery = srcConn.Query($"show create table {srcSchemaName}.{tableName}").ToList()
                         .Select(x => (IDictionary<string, object>)x).ToList()[0]["Create Table"].ToString();
                     var pk = srcConn.Query<string>("select column_name from information_schema.COLUMNS "
                                                    + "where TABLE_SCHEMA = @Schema and TABLE_NAME = @Table and COLUMN_KEY = 'PRI'",
                         new { Schema = srcSchemaName, Table = tableName }).ToList();
                     var columns = FindColumns(srcSchemaName, tableName);
-
-                    //var loopCount = 20;
-                    var loopCount = count / _maxRows + 1;
-
+                    
                     using (var dstConn = ConnectionFactory(_destString))
                     {
                         var sqlMode = dstConn.Query<string>("select @@SESSION.sql_mode").First();
@@ -129,31 +123,26 @@ namespace CloudSync.Utils
                         dstConn.Execute("set unique_checks = 0");
 
                         dstConn.Execute(createQuery.Replace("CREATE TABLE ", $"CREATE TABLE IF NOT EXISTS {destSchemaName}."));
-                        
-                        for (var i = 0; i < loopCount; i++)
-                        {
-                            List<IDictionary<string, object>> record;
-                            DataTable table;
-                            using (var srcTrans = srcConn.BeginTransaction())
-                            {
-                                record = srcConn
-                                    .Query($"select * from {srcSchemaName}.{tableName} " +
-                                           $"order by {string.Join(", ", pk)} asc limit {_maxRows} offset {i * _maxRows}",
-                                        null, srcTrans, true, 0)
-                                    .Select(x => (IDictionary<string, object>) x).ToList();
-                                table = ConvertToDataTable(record, columns);
-                            }
 
+                        //srcConn.Execute("set session sort_buffer_size=2147483648");
+                        
+                        foreach(var sample in LazyLoad(srcConn, srcSchemaName, tableName, columns))
+                        {
+                            if (sample.Rows.Count == 0)
+                                break;
+                            
                             using (var dstTrans = dstConn.BeginTransaction())
                             {
-                                var bulkCopy = new MySqlBulkCopy(dstConn, dstTrans)
+                                var bulk = new BulkOperation(dstConn)
                                 {
+                                    BatchSize = _maxRows,
                                     DestinationTableName = $"{destSchemaName}.{tableName}",
-                                    BulkCopyTimeout = 0
+                                    BatchTimeout = 0,
+                                    Transaction = dstTrans
                                 };
-                                bulkCopy.WriteToServer(table);
+                                bulk.BulkInsert(sample);
 
-                                copiedRows += record.Count;
+                                copiedRows += sample.Rows.Count;
                                 dstTrans.Commit();
                             }
                         }
@@ -224,6 +213,31 @@ namespace CloudSync.Utils
                 Type = column["COLUMN_TYPE"].ToString(),
                 Nullable = column["IS_NULLABLE"].ToString() == "YES"
             }).ToList();
+        }
+
+        private IEnumerable<DataTable> LazyLoad(IDbConnection conn, string srcSchema, string srcTable, IReadOnlyCollection<ColumnType> types)
+        {
+            var dataTable = new DataTable();
+            var record = conn.ExecuteReader($"select * from {srcSchema}.{srcTable}", commandTimeout: 0);
+
+            foreach (var type in types)
+                dataTable.Columns.Add(type.Name);
+
+            while (record.Read())
+            {
+                var row = dataTable.NewRow();
+                for (var i = 0; i < types.Count; i++)
+                    row[record.GetName(i)] = record.GetValue(i);
+                dataTable.Rows.Add(row);
+
+                if (dataTable.Rows.Count < _maxRows)
+                    continue;
+
+                yield return dataTable;
+                dataTable.Rows.Clear();
+            }
+
+            yield return dataTable;
         }
     }
 }

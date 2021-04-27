@@ -9,14 +9,15 @@
                    mc:Ignorable="d" Width="600" Height="300" AllowDrop="True"
                    VerticalAlignment="Center" HorizontalAlignment="Center">
     <dlgs:CustomDialog.DialogTop>
-        <Grid Height="35">
+        <Grid Height="35" Background="{StaticResource MahApps.Brushes.Accent}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="35"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0" Content="{Binding Title, Mode=OneTime}" FontSize="20" Margin="10,0,0,0" VerticalAlignment="Center"/>
-            <Button Grid.Column="1" Width="30" Margin="0,0,5,0" Padding="0" IsTabStop="False" Focusable="False" BorderThickness="0"
-                    ctrls:ControlsHelper.CornerRadius="0" Command="{Binding CloseCommand}">
+            <Label Grid.Column="0" Content="{Binding Title, Mode=OneTime}" FontSize="15" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="White"/>
+            <Button Grid.Column="1" Width="30" Margin="0,0,0,0" IsTabStop="False" Focusable="False" BorderThickness="0"
+                    Background="Transparent" Foreground="White" ctrls:ControlsHelper.MouseOverBorderBrush="Red" ctrls:ControlsHelper.CornerRadius="0"
+                    Command="{Binding CloseCommand}">
                 <Rectangle Width="15" Height="15" Fill="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                     <Rectangle.OpacityMask>
                         <VisualBrush Stretch="Fill" Visual="{iconPacks:BootstrapIcons Kind=X}"/>
