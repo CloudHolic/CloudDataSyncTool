@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using CloudSync.Models;
 using Dapper;
@@ -20,7 +19,7 @@ namespace CloudSync.Utils
         {
             _srcString = MakeConnectionString(srcConString);
             _destString = MakeConnectionString(destConString);
-            _maxRows = ConfigManager.Instance.Config.MaxRows / 10;
+            _maxRows = ConfigManager.Instance.Config.MaxRows;
         }
 
         public static bool CheckConnection(Connection conn)
@@ -135,7 +134,6 @@ namespace CloudSync.Utils
                             {
                                 var bulk = new BulkOperation(dstConn)
                                 {
-                                    BatchSize = _maxRows,
                                     DestinationTableName = $"{destSchemaName}.{tableName}",
                                     BatchTimeout = 0,
                                     Transaction = dstTrans
@@ -178,23 +176,6 @@ namespace CloudSync.Utils
             return connection;
         }
 
-        private static DataTable ConvertToDataTable(IEnumerable<IDictionary<string, object>> data, IReadOnlyCollection<ColumnType> types)
-        {
-            var table = new DataTable();
-
-            foreach (var type in types)
-                table.Columns.Add(type.Name);
-            
-            foreach (var item in data)
-            {
-                var row = table.NewRow();
-                foreach (var type in types)
-                    row[type.Name] = item[type.Name];
-                table.Rows.Add(row);
-            }
-            return table;
-        }
-
         private List<ColumnType> FindColumns(string schemaName, string tableName, bool isSrc = true)
         {
             List<IDictionary<string, object>> result;
@@ -227,7 +208,13 @@ namespace CloudSync.Utils
             {
                 var row = dataTable.NewRow();
                 for (var i = 0; i < types.Count; i++)
-                    row[record.GetName(i)] = record.GetValue(i);
+                {
+                    if (record.GetValue(i) is DateTime dateTime)
+                        row[record.GetName(i)] = dateTime.ToString("yyyy-MM-dd hh:mm:ss");
+                    else
+                        row[record.GetName(i)] = record.GetValue(i);
+                }
+
                 dataTable.Rows.Add(row);
 
                 if (dataTable.Rows.Count < _maxRows)

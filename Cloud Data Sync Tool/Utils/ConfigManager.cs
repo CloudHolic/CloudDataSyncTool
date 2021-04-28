@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using CloudSync.Models;
 using YamlDotNet.Serialization;
@@ -25,9 +24,6 @@ namespace CloudSync.Utils
 
             [YamlMember(typeof(int))]
             public int MaxRows { get; set; }
-
-            [YamlMember(typeof(int))]
-            public int AlertRows { get; set; }
             
             [YamlMember(typeof(Dictionary<string, DbSetting>))]
             public Dictionary<string, DbSetting> Connections { get; set; }
@@ -38,8 +34,7 @@ namespace CloudSync.Utils
                 WindowTop = 0;
                 WindowHeight = 500;
                 WindowWidth = 800;
-                MaxRows = 1000000;
-                AlertRows = 1000000;
+                MaxRows = 500000;
                 Connections = new Dictionary<string, DbSetting>();
             }
         }
