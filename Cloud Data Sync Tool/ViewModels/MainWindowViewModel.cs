@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using CloudSync.Commands;
 using CloudSync.Contents;
 using CloudSync.Controls;
@@ -21,6 +23,8 @@ namespace CloudSync.ViewModels
         private Connection _srcConnection, _dstConnection;
         private readonly StackPanel _srcPanel, _dstPanel;
         private readonly ICustomDialogManager _dialogManager;
+        private readonly DispatcherTimer _timer;
+        private readonly Stopwatch _stopwatch;
         private readonly string[] _systemSchemas = {"mysql", "sys", "information_schema", "performance_schema"};
 
         public bool IsSrcOpened
@@ -77,6 +81,12 @@ namespace CloudSync.ViewModels
             set { Set(() => ProgressStatus, value); }
         }
 
+        public string Time
+        {
+            get { return Get(() => Time); }
+            set { Set(() => Time, value); }
+        }
+
         public string SearchText
         {
             get { return Get(() => SearchText); }
@@ -98,6 +108,11 @@ namespace CloudSync.ViewModels
                 AnimateHide = false,
                 AnimateShow = false
             });
+
+            _timer = new DispatcherTimer {Interval = TimeSpan.FromSeconds(0.01)};
+            _timer.Tick += TimerTick;
+
+            _stopwatch = new Stopwatch();
 
             BulkCopyWorker.Instance.InitWorker(CopyCompleted, ProgressChanged);
 
@@ -154,6 +169,8 @@ namespace CloudSync.ViewModels
                     }
 
                     IsWorking = true;
+                    _stopwatch.Start();
+                    _timer.Start();
 
                     string srcSchema = "", dstSchema = "";
 
@@ -259,6 +276,15 @@ namespace CloudSync.ViewModels
             }
         }
 
+        private void TimerTick(object sender, EventArgs e)
+        {
+            if (_stopwatch.IsRunning)
+            {
+                var elapsed = _stopwatch.Elapsed;
+                Time = $"Elapsed Time: {elapsed.Hours:D2}:{elapsed.Minutes:D2}:{elapsed.Seconds:D2}.{elapsed.Milliseconds / 10:D2}";
+            }
+        }
+
         private void CopyCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             string title, notifyText;
@@ -288,6 +314,14 @@ namespace CloudSync.ViewModels
             _dialogManager.ShowDialogAsync(new NotifyView(title, notifyText));
             IsWorking = false;
             LoadTables();
+            EventBus.Instance.Publish(new SearchTextChangedEvent
+            {
+                IsSrc = true,
+                SearchText = SearchText
+            });
+
+            _stopwatch.Reset();
+            _timer.Stop();
         }
 
         private void ProgressChanged(object sender, ProgressChangedEventArgs e)

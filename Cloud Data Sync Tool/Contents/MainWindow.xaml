@@ -156,9 +156,14 @@
         </GroupBox>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical">
             <mah:MetroProgressBar Margin="0,5,0,0" Maximum="100" Minimum="0" Value="{Binding ProgressValue}" Height="10" BorderThickness="0"/>
-                                  <!--Visibility="{Binding IsWorking, Converter={StaticResource BooleanToVisibilityConverter}}"-->
-            <TextBlock Margin="0,5,0,-5" TextAlignment="Left" VerticalAlignment="Center" Text="{Binding ProgressStatus}"/>
-                       <!--Visibility="{Binding IsWorking, Converter={StaticResource BooleanToVisibilityConverter}}"-->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Margin="0,5,0,-5" TextAlignment="Left" VerticalAlignment="Center" Text="{Binding ProgressStatus}"/>
+                <TextBlock Grid.Column="1" Margin="0,5,0,-5" TextAlignment="Right" VerticalAlignment="Center" Text="{Binding Time}"/>
+            </Grid>
         </StackPanel>
     </Grid>
 </mah:MetroWindow>
