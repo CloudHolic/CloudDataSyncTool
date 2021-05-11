@@ -1,6 +1,5 @@
 ﻿using System.Windows.Input;
 using CloudSync.Commands;
-using CloudSync.Models;
 
 namespace CloudSync.ViewModels
 {

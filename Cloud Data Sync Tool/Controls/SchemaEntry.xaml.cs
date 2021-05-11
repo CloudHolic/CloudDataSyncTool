@@ -1,5 +1,4 @@
-﻿using System.Web.UI.WebControls;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using CloudSync.Models;
 using CloudSync.ViewModels;
 
