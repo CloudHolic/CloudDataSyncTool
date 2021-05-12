@@ -86,6 +86,7 @@ namespace CloudSync.Utils
                 tableList = null;
             }
 
+            tableList?.Sort();
             return tableList;
         }
 
