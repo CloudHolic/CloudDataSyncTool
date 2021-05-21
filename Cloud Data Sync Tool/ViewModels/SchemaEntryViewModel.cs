@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -75,6 +76,9 @@ namespace CloudSync.ViewModels
             {
                 return Get(() => GotFocusCommand, new RelayCommand<SchemaEntry>(schema =>
                 {
+                    if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                        return;
+
                     var parent = schema.TryFindParent<StackPanel>();
                     var children = parent.FindVisualChildren<SchemaEntry>();
                     

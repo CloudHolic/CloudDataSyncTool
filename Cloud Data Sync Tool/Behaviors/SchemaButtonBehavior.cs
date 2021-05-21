@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using MahApps.Metro.Controls;
@@ -19,6 +20,9 @@ namespace CloudSync.Behaviors
 
         private void AssociatedObjectOnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
             var parent = AssociatedObject.TryFindParent<StackPanel>();
             if (parent != null)
             {
@@ -38,8 +42,11 @@ namespace CloudSync.Behaviors
 
         private static void OnIsCheckedChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var oldValue = e.OldValue is bool o && o;
-            var newValue = e.NewValue is bool n && n;
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
+            var oldValue = e.OldValue is true;
+            var newValue = e.NewValue is true;
 
             if (!oldValue && newValue)
             {
@@ -61,12 +68,18 @@ namespace CloudSync.Behaviors
 
         protected override void OnAttached()
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
             AssociatedObject.PreviewMouseDown += AssociatedObjectOnMouseDown;
             base.OnAttached();
         }
 
         protected override void OnDetaching()
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
             if (AssociatedObject != null)
                 AssociatedObject.PreviewMouseDown -= AssociatedObjectOnMouseDown;
 

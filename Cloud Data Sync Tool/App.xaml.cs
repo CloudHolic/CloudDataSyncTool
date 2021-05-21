@@ -17,7 +17,7 @@ namespace CloudSync
             var openWindow = new OpenWindow();
 
             openWindow.ShowDialog();
-            if (!(openWindow.Tag is Tuple<Connection, Connection> result))
+            if (openWindow.Tag is not Tuple<Connection, Connection> result)
                 Current.Shutdown();
             else
             {

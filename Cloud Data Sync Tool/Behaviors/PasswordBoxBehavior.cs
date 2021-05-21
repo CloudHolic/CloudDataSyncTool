@@ -1,4 +1,5 @@
-﻿using Microsoft.Xaml.Behaviors;
+﻿using System;
+using Microsoft.Xaml.Behaviors;
 using System.Security;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,11 +20,17 @@ namespace CloudSync.Behaviors
 
         private void AssociatedObjectOnPasswordChanged(object s, RoutedEventArgs e)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
             BoundPassword = AssociatedObject.SecurePassword;
         }
 
         public static void OnBoundPasswordChanged(object s, DependencyPropertyChangedEventArgs e)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+            
             var box = ((PasswordBoxBehavior) s).AssociatedObject;
             var securePassword = (SecureString) e.NewValue;
             if (box == null)
@@ -38,12 +45,18 @@ namespace CloudSync.Behaviors
 
         protected override void OnAttached()
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
             AssociatedObject.PasswordChanged += AssociatedObjectOnPasswordChanged;
             base.OnAttached();
         }
 
         protected override void OnDetaching()
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(7))
+                return;
+
             if (AssociatedObject != null)
                 AssociatedObject.PasswordChanged -= AssociatedObjectOnPasswordChanged;
 
